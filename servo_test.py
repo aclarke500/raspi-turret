@@ -1,19 +1,28 @@
 import RPi.GPIO as GPIO
 import time
 
-GPIO.setmode(GPIO.BCM)
-GPIO.setup(17, GPIO.OUT)
+# Pin config
+SERVO_PIN = 17  # GPIO 17 = Physical pin 11
 
-pwm = GPIO.PWM(17, 50)  # 50Hz = 20ms period
-pwm.start(0)
+print("[INIT] Setting up GPIO mode...")
+GPIO.setmode(GPIO.BCM)
+GPIO.setup(SERVO_PIN, GPIO.OUT)
+
+print("[INIT] Starting PWM on pin 17 at 50Hz (20ms period)...")
+pwm = GPIO.PWM(SERVO_PIN, 50)  # 50Hz for servo control
+pwm.start(0)  # initial duty cycle
 
 def set_angle(angle):
-    duty = (0.05 * angle) + 2.5  # maps 0–180° to 2.5–12.5% duty cycle
+    # Convert angle (0–180) to duty cycle
+    duty = (0.05 * angle) + 2.5
+    print(f"[MOVE] Setting angle to {angle}°, which maps to duty cycle {duty:.2f}%")
     pwm.ChangeDutyCycle(duty)
     time.sleep(0.5)
-    pwm.ChangeDutyCycle(0)  # optional: stops jitter
+    print("[MOVE] Killing PWM duty to reduce jitter")
+    pwm.ChangeDutyCycle(0)
 
 try:
+    print("[RUN] Starting servo movement loop...")
     while True:
         set_angle(0)
         time.sleep(1)
@@ -23,5 +32,7 @@ try:
         time.sleep(1)
 
 except KeyboardInterrupt:
+    print("[EXIT] CTRL+C received, stopping PWM...")
     pwm.stop()
     GPIO.cleanup()
+    print("[CLEANUP] GPIO cleaned up.")

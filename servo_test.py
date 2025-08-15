@@ -19,7 +19,7 @@ def set_angle(angle):
     pwm.ChangeDutyCycle(duty)
     time.sleep(0.5)
     print("[MOVE] Killing PWM duty to reduce jitter")
-    pwm.ChangeDutyCycle(0)
+    # pwm.ChangeDutyCycle(0)
 
 try:
     print("[RUN] Starting servo movement loop...")

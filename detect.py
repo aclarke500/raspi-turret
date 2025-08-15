@@ -16,7 +16,11 @@ output_details = interpreter.get_output_details()
 
 def get_target_direction():
     # take photo
-    subprocess.run(["bash", "photo.sh"])
+    subprocess.run(
+    "SIZE=1280x720 FPS=30 bash photo.sh /dev/video0",
+    shell=True, check=True
+
+)
 
     img = Image.open("test.jpg").resize((300, 300))
     input_data = np.expand_dims(np.array(img, dtype=np.uint8), axis=0)

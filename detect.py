@@ -55,10 +55,11 @@ def get_target_direction():
             # compute vector from target to person center
             vector = (person_center[0] - target[0], person_center[1] - target[1])
 
-            print(f"Detected PERSON with {scores[i]*100:.1f}% confidence")
-            print(f"Bounding box: ({left}, {top}) to ({right}, {bottom})")
-            print(f"Center of person: {person_center}")
-            print(f"Vector from target {target} to person: {vector}")
+            # print(f"Detected PERSON with {scores[i]*100:.1f}% confidence")
+            # print(f"Bounding box: ({left}, {top}) to ({right}, {bottom})")
+            # print(f"Center of person: {person_center}")
+            # print(f"Vector from target {target} to person: {vector}")
+            print(vector[0])
 
 
 

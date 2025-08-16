@@ -59,7 +59,10 @@ def get_target_direction():
             # print(f"Bounding box: ({left}, {top}) to ({right}, {bottom})")
             # print(f"Center of person: {person_center}")
             # print(f"Vector from target {target} to person: {vector}")
-            print(vector[0])
+            # print(vector[0])
+            x_normalized = vector[0] / (width / 2)
+            print(x_normalized)
+
 
 
 

@@ -35,7 +35,7 @@ def set_angle(angle):
     duty = (0.05 * angle) + 2.5
     print(f"[MOVE] Setting angle to {angle}°, which maps to duty cycle {duty:.2f}%")
     pwm.ChangeDutyCycle(duty)
-    time.sleep(0.5)
+    time.sleep(0.1)
     print("[MOVE] Killing PWM duty to reduce jitter")
     # pwm.ChangeDutyCycle(0)
 
@@ -102,7 +102,6 @@ def is_in_safezone(x):
 def sweep_left():
     set_angle(0)
     angles_to_check = np.linspace(0, 270, 30)
-    time.sleep(0.25)
     for angle in angles_to_check:
         set_angle(angle)
 

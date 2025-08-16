@@ -93,7 +93,10 @@ def get_target_direction():
 
 def is_in_safezone(x):
     degrees = 135 * abs(x)
-    return degrees <= 5
+    not_valid = degrees <= 20
+    if not_valid:
+        print("not valid: ", degrees, " degrees.")
+    return degrees <= 20
 
 base = 135
 set_angle(base)

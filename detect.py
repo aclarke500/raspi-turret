@@ -91,10 +91,14 @@ def get_target_direction():
         print(f"[ERROR] get_target_direction failed: {e}")
         return None
 
+def is_in_safezone(x):
+    degrees = 135 * abs(x)
+    return degrees <= 5
+
 base = 135
 set_angle(base)
 for i in range(1000):
     x=get_target_direction()
-    if x is not None:
+    if x is not None and not is_in_safezone(x):
         angle = base - (x * 45)
         set_angle(angle)

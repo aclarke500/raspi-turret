@@ -96,5 +96,5 @@ set_angle(base)
 for i in range(1000):
     x=get_target_direction()
     if x is not None:
-        angle = base + (x * 45)  # gives you 90° to 180° range
+        angle = base + (-x * 45)  # gives you 90° to 180° range
         set_angle(angle)

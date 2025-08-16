@@ -63,6 +63,6 @@ def get_target_direction():
 
 
 
-for i in range(10):
+for i in range(1000):
     get_target_direction()
     time.sleep(0)

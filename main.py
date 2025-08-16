@@ -3,4 +3,5 @@ T = Turret()  # Create an instance
 T.setup()
 
 while True:
-    T.patrol()
+    offset = T.patrol()
+    

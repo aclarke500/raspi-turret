@@ -87,27 +87,27 @@ def is_in_safezone(x):
     return degrees <= 20
 
 
-def sweep_left():
-    set_angle(0)
-    angles_to_check = np.linspace(0, 270, 30)
-    reverse = np.linspace(270, 0, 30)
-    print("sweep a")
-    for angle in angles_to_check:
-        print(angle)
-        set_angle(angle)
-    print("sweep b")
-    for a in reverse:
-        set_angle(a)
-        print(a)
+# def sweep_left():
+#     set_angle(0)
+#     angles_to_check = np.linspace(0, 270, 30)
+#     reverse = np.linspace(270, 0, 30)
+#     print("sweep a")
+#     for angle in angles_to_check:
+#         print(angle)
+#         set_angle(angle)
+#     print("sweep b")
+#     for a in reverse:
+#         set_angle(a)
+#         print(a)
 
     
 
-base = 135
-set_angle(base)
-for i in range(1000):
-    sweep_left()
+# base = 135
+# set_angle(base)
+# for i in range(1000):
+#     sweep_left()
     
-    # x=get_target_direction()
-    # if x is not None and not is_in_safezone(x):
-    #     angle = base - (x * 45)
-    #     set_angle(angle)
+#     # x=get_target_direction()
+#     # if x is not None and not is_in_safezone(x):
+#     #     angle = base - (x * 45)
+#     #     set_angle(angle)

@@ -4,6 +4,8 @@ import tflite_runtime.interpreter as tflite
 import numpy as np
 import signal
 import sys
+from utils.detect import get_target_direction
+from utils.utils import x_offset_to_degrees
 
 SERVO_PIN = 17  # GPIO 17 = Physical pin 11
 
@@ -41,6 +43,7 @@ class Turret:
         duty = (0.05 * angle) + 2.5
         print(f"[MOVE] Setting angle to {angle}°, which maps to duty cycle {duty:.2f}%")
         pwm.ChangeDutyCycle(duty)
+        self.current_x_angle = angle
         time.sleep(0.1)
 
     def patrol(self):
@@ -50,4 +53,29 @@ class Turret:
         angles = np.concatenate([left_to_right, right_to_left])
         for angle in angles:
             self.set_angle(angle)
+            # returns offset [-1, 1] or None if no one is seen
+            offset_of_target = get_target_direction()
+            if not offset_of_target is None:
+                degrees_offset = x_offset_to_degrees(offset_of_target)
+                target_angle = self.current_x_angle + degrees_offset
+                print(f"[TARGET] Found target! X offset: {offset_of_target:.2f}, " 
+                      f"Degrees offset: {degrees_offset:.1f}°, Current angle: {self.current_x_angle:.1f}°, "
+                      f"Target angle: {target_angle:.1f}°")
+                return degrees_offset
+        return None
+    
+    def snap_to_target(self, offset_degrees):
+        max_attempts = 5
+        for _ in range(max_attempts):
+            self.set_angle(self.current_x_angle + offset_degrees)
+            time.sleep(0.1)  # give model time to see new position
+            offset_of_target = get_target_direction()
+            if offset_of_target is None or abs(offset_of_target) < 0.05:
+                time.sleep(2)
+                break  # close enough
+            offset_degrees = x_offset_to_degrees(offset_of_target)
+
+
+
+
 

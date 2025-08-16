@@ -29,16 +29,8 @@ input_details = interpreter.get_input_details()
 output_details = interpreter.get_output_details()
 
 
-
-# def set_angle(angle):
-#     # Convert angle (0–180) to duty cycle
-#     duty = (0.05 * angle) + 2.5
-#     print(f"[MOVE] Setting angle to {angle}°, which maps to duty cycle {duty:.2f}%")
-#     pwm.ChangeDutyCycle(duty)
-#     time.sleep(0.1)
-#     print("[MOVE] Killing PWM duty to reduce jitter")
-#     # pwm.ChangeDutyCycle(0)
-
+with open(Path.home() / "tflite_models" / "coco_labels.txt") as f:
+    labels = f.read().splitlines()
 
 def get_target_direction():
     try:
@@ -56,11 +48,7 @@ def get_target_direction():
 
         boxes = interpreter.get_tensor(output_details[0]['index'])[0]
         classes = interpreter.get_tensor(output_details[1]['index'])[0]
-        scores = interpreter.get_tensor(output_details[2]['index'])[0]
-
-        with open(Path.home() / "tflite_models" / "coco_labels.txt") as f:
-            labels = f.read().splitlines()
-        
+        scores = interpreter.get_tensor(output_details[2]['index'])[0]        
         # open image again to get original size
         orig_img = Image.open("test.jpg")
         width, height = orig_img.size

@@ -39,22 +39,6 @@ def set_angle(angle):
     print("[MOVE] Killing PWM duty to reduce jitter")
     # pwm.ChangeDutyCycle(0)
 
-try:
-    print("[RUN] Starting servo movement loop...")
-    while True:
-        set_angle(0)
-        time.sleep(1)
-        set_angle(90)
-        time.sleep(1)
-        set_angle(180)
-        time.sleep(1)
-
-except KeyboardInterrupt:
-    print("[EXIT] CTRL+C received, stopping PWM...")
-    pwm.stop()
-    GPIO.cleanup()
-    print("[CLEANUP] GPIO cleaned up.")
-
 
 def get_target_direction():
     try:
@@ -111,5 +95,6 @@ base = 135
 set_angle(base)
 for i in range(1000):
     x=get_target_direction()
-    set_angle(x*135)
-    time.sleep(0.5)
+    if x is not None:
+        set_angle(x*135)
+        time.sleep(0.5)

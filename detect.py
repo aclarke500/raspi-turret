@@ -98,10 +98,20 @@ def is_in_safezone(x):
         print("not valid: ", degrees, " degrees.")
     return degrees <= 20
 
+
+def sweep_left():
+    set_angle(0)
+    angles_to_check = np.linspace(0, 270, 30)
+    time.sleep(0.25)
+    for angle in angles_to_check:
+        set_angle(angle)
+
 base = 135
 set_angle(base)
 for i in range(1000):
-    x=get_target_direction()
-    if x is not None and not is_in_safezone(x):
-        angle = base - (x * 45)
-        set_angle(angle)
+    sweep_left()
+    
+    # x=get_target_direction()
+    # if x is not None and not is_in_safezone(x):
+    #     angle = base - (x * 45)
+    #     set_angle(angle)

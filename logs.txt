@@ -1,0 +1,268 @@
+         |   3 +-
+ utils/detect.py |  40 +++++------
+ 3 files changed, 124 insertions(+), 123 deletions(-)
+(venv) aclarke500@raspberrypi:~/Desktop/tflite-prac $ python main.py 
+[INIT] Setting up GPIO mode...
+[INIT] Starting PWM on pin 17 at 50Hz (20ms period)...
+[MOVE] Setting angle to 0°, which maps to duty cycle 2.50%
+[MOVE] Setting angle to 0°, which maps to duty cycle 2.50%
+[MOVE] Setting angle to 0.0°, which maps to duty cycle 2.50%
+Using /dev/video0 (yuyv422 1280x720@30)
+Saved test.jpg
+[MOVE] Setting angle to 9.310344827586206°, which maps to duty cycle 2.97%
+Using /dev/video0 (yuyv422 1280x720@30)
+Saved test.jpg
+[MOVE] Setting angle to 18.620689655172413°, which maps to duty cycle 3.43%
+Using /dev/video0 (yuyv422 1280x720@30)
+Saved test.jpg
+[MOVE] Setting angle to 27.93103448275862°, which maps to duty cycle 3.90%
+Using /dev/video0 (yuyv422 1280x720@30)
+Saved test.jpg
+[MOVE] Setting angle to 37.241379310344826°, which maps to duty cycle 4.36%
+Using /dev/video0 (yuyv422 1280x720@30)
+Saved test.jpg
+[MOVE] Setting angle to 46.55172413793103°, which maps to duty cycle 4.83%
+Using /dev/video0 (yuyv422 1280x720@30)
+Saved test.jpg
+-0.621875
+[TARGET] Found target! X offset: -0.62, Degrees offset: -17.1°, Current angle: 46.6°, Target angle: 29.5°
+[MOVE] Setting angle to 0°, which maps to duty cycle 2.50%
+[MOVE] Setting angle to 0.0°, which maps to duty cycle 2.50%
+Using /dev/video0 (yuyv422 1280x720@30)
+Saved test.jpg
+[MOVE] Setting angle to 9.310344827586206°, which maps to duty cycle 2.97%
+Using /dev/video0 (yuyv422 1280x720@30)
+Saved test.jpg
+[MOVE] Setting angle to 18.620689655172413°, which maps to duty cycle 3.43%
+Using /dev/video0 (yuyv422 1280x720@30)
+Saved test.jpg
+[MOVE] Setting angle to 27.93103448275862°, which maps to duty cycle 3.90%
+Using /dev/video0 (yuyv422 1280x720@30)
+Saved test.jpg
+[MOVE] Setting angle to 37.241379310344826°, which maps to duty cycle 4.36%
+Using /dev/video0 (yuyv422 1280x720@30)
+Saved test.jpg
+0.4453125
+[TARGET] Found target! X offset: 0.45, Degrees offset: 12.2°, Current angle: 37.2°, Target angle: 49.5°
+[MOVE] Setting angle to 0°, which maps to duty cycle 2.50%
+[MOVE] Setting angle to 0.0°, which maps to duty cycle 2.50%
+Using /dev/video0 (yuyv422 1280x720@30)
+Saved test.jpg
+[MOVE] Setting angle to 9.310344827586206°, which maps to duty cycle 2.97%
+Using /dev/video0 (yuyv422 1280x720@30)
+Saved test.jpg
+-0.434375
+[TARGET] Found target! X offset: -0.43, Degrees offset: -11.9°, Current angle: 9.3°, Target angle: -2.6°
+[MOVE] Setting angle to 0°, which maps to duty cycle 2.50%
+[MOVE] Setting angle to 0.0°, which maps to duty cycle 2.50%
+Using /dev/video0 (yuyv422 1280x720@30)
+Saved test.jpg
+[MOVE] Setting angle to 9.310344827586206°, which maps to duty cycle 2.97%
+Using /dev/video0 (yuyv422 1280x720@30)
+Saved test.jpg
+-0.56953125
+[TARGET] Found target! X offset: -0.57, Degrees offset: -15.7°, Current angle: 9.3°, Target angle: -6.4°
+[MOVE] Setting angle to 0°, which maps to duty cycle 2.50%
+[MOVE] Setting angle to 0.0°, which maps to duty cycle 2.50%
+Using /dev/video0 (yuyv422 1280x720@30)
+Saved test.jpg
+-0.72421875
+[TARGET] Found target! X offset: -0.72, Degrees offset: -19.9°, Current angle: 0.0°, Target angle: -19.9°
+[MOVE] Setting angle to 0°, which maps to duty cycle 2.50%
+[MOVE] Setting angle to 0.0°, which maps to duty cycle 2.50%
+Using /dev/video0 (yuyv422 1280x720@30)
+Saved test.jpg
+-0.41640625
+[TARGET] Found target! X offset: -0.42, Degrees offset: -11.5°, Current angle: 0.0°, Target angle: -11.5°
+[MOVE] Setting angle to 0°, which maps to duty cycle 2.50%
+[MOVE] Setting angle to 0.0°, which maps to duty cycle 2.50%
+Using /dev/video0 (yuyv422 1280x720@30)
+Saved test.jpg
+-0.1671875
+[TARGET] Found target! X offset: -0.17, Degrees offset: -4.6°, Current angle: 0.0°, Target angle: -4.6°
+[MOVE] Setting angle to 0°, which maps to duty cycle 2.50%
+[MOVE] Setting angle to 0.0°, which maps to duty cycle 2.50%
+Using /dev/video0 (yuyv422 1280x720@30)
+Saved test.jpg
+-0.55859375
+[TARGET] Found target! X offset: -0.56, Degrees offset: -15.4°, Current angle: 0.0°, Target angle: -15.4°
+[MOVE] Setting angle to 0°, which maps to duty cycle 2.50%
+[MOVE] Setting angle to 0.0°, which maps to duty cycle 2.50%
+Using /dev/video0 (yuyv422 1280x720@30)
+Saved test.jpg
+-0.58203125
+[TARGET] Found target! X offset: -0.58, Degrees offset: -16.0°, Current angle: 0.0°, Target angle: -16.0°
+[MOVE] Setting angle to 0°, which maps to duty cycle 2.50%
+[MOVE] Setting angle to 0.0°, which maps to duty cycle 2.50%
+Using /dev/video0 (yuyv422 1280x720@30)
+Saved test.jpg
+-0.56953125
+[TARGET] Found target! X offset: -0.57, Degrees offset: -15.7°, Current angle: 0.0°, Target angle: -15.7°
+[MOVE] Setting angle to 0°, which maps to duty cycle 2.50%
+[MOVE] Setting angle to 0.0°, which maps to duty cycle 2.50%
+Using /dev/video0 (yuyv422 1280x720@30)
+Saved test.jpg
+-0.43359375
+[TARGET] Found target! X offset: -0.43, Degrees offset: -11.9°, Current angle: 0.0°, Target angle: -11.9°
+[MOVE] Setting angle to 0°, which maps to duty cycle 2.50%
+[MOVE] Setting angle to 0.0°, which maps to duty cycle 2.50%
+Using /dev/video0 (yuyv422 1280x720@30)
+Saved test.jpg
+-0.0984375
+[TARGET] Found target! X offset: -0.10, Degrees offset: -2.7°, Current angle: 0.0°, Target angle: -2.7°
+[MOVE] Setting angle to 0°, which maps to duty cycle 2.50%
+[MOVE] Setting angle to 0.0°, which maps to duty cycle 2.50%
+Using /dev/video0 (yuyv422 1280x720@30)
+Saved test.jpg
+-0.4828125
+[TARGET] Found target! X offset: -0.48, Degrees offset: -13.3°, Current angle: 0.0°, Target angle: -13.3°
+[MOVE] Setting angle to 0°, which maps to duty cycle 2.50%
+[MOVE] Setting angle to 0.0°, which maps to duty cycle 2.50%
+Using /dev/video0 (yuyv422 1280x720@30)
+Saved test.jpg
+-0.4703125
+[TARGET] Found target! X offset: -0.47, Degrees offset: -12.9°, Current angle: 0.0°, Target angle: -12.9°
+[MOVE] Setting angle to 0°, which maps to duty cycle 2.50%
+[MOVE] Setting angle to 0.0°, which maps to duty cycle 2.50%
+Using /dev/video0 (yuyv422 1280x720@30)
+Saved test.jpg
+[MOVE] Setting angle to 9.310344827586206°, which maps to duty cycle 2.97%
+Using /dev/video0 (yuyv422 1280x720@30)
+Saved test.jpg
+[MOVE] Setting angle to 18.620689655172413°, which maps to duty cycle 3.43%
+Using /dev/video0 (yuyv422 1280x720@30)
+Saved test.jpg
+-0.6828125
+[TARGET] Found target! X offset: -0.68, Degrees offset: -18.8°, Current angle: 18.6°, Target angle: -0.2°
+[MOVE] Setting angle to 0°, which maps to duty cycle 2.50%
+[MOVE] Setting angle to 0.0°, which maps to duty cycle 2.50%
+Using /dev/video0 (yuyv422 1280x720@30)
+Saved test.jpg
+-0.30703125
+[TARGET] Found target! X offset: -0.31, Degrees offset: -8.4°, Current angle: 0.0°, Target angle: -8.4°
+[MOVE] Setting angle to 0°, which maps to duty cycle 2.50%
+[MOVE] Setting angle to 0.0°, which maps to duty cycle 2.50%
+Using /dev/video0 (yuyv422 1280x720@30)
+Saved test.jpg
+-0.23125
+[TARGET] Found target! X offset: -0.23, Degrees offset: -6.4°, Current angle: 0.0°, Target angle: -6.4°
+[MOVE] Setting angle to 0°, which maps to duty cycle 2.50%
+[MOVE] Setting angle to 0.0°, which maps to duty cycle 2.50%
+Using /dev/video0 (yuyv422 1280x720@30)
+Saved test.jpg
+-0.00703125
+[TARGET] Found target! X offset: -0.01, Degrees offset: -0.2°, Current angle: 0.0°, Target angle: -0.2°
+[MOVE] Setting angle to 0°, which maps to duty cycle 2.50%
+[MOVE] Setting angle to 0.0°, which maps to duty cycle 2.50%
+Using /dev/video0 (yuyv422 1280x720@30)
+Saved test.jpg
+[MOVE] Setting angle to 9.310344827586206°, which maps to duty cycle 2.97%
+Using /dev/video0 (yuyv422 1280x720@30)
+Saved test.jpg
+[MOVE] Setting angle to 18.620689655172413°, which maps to duty cycle 3.43%
+Using /dev/video0 (yuyv422 1280x720@30)
+Saved test.jpg
+[MOVE] Setting angle to 27.93103448275862°, which maps to duty cycle 3.90%
+Using /dev/video0 (yuyv422 1280x720@30)
+Saved test.jpg
+-0.6921875
+[TARGET] Found target! X offset: -0.69, Degrees offset: -19.0°, Current angle: 27.9°, Target angle: 8.9°
+[MOVE] Setting angle to 0°, which maps to duty cycle 2.50%
+[MOVE] Setting angle to 0.0°, which maps to duty cycle 2.50%
+Using /dev/video0 (yuyv422 1280x720@30)
+Saved test.jpg
+[MOVE] Setting angle to 9.310344827586206°, which maps to duty cycle 2.97%
+Using /dev/video0 (yuyv422 1280x720@30)
+Saved test.jpg
+[MOVE] Setting angle to 18.620689655172413°, which maps to duty cycle 3.43%
+Using /dev/video0 (yuyv422 1280x720@30)
+Saved test.jpg
+-0.39765625
+[TARGET] Found target! X offset: -0.40, Degrees offset: -10.9°, Current angle: 18.6°, Target angle: 7.7°
+[MOVE] Setting angle to 0°, which maps to duty cycle 2.50%
+[MOVE] Setting angle to 0.0°, which maps to duty cycle 2.50%
+Using /dev/video0 (yuyv422 1280x720@30)
+Saved test.jpg
+[ERROR] get_target_direction failed: list index out of range
+[MOVE] Setting angle to 9.310344827586206°, which maps to duty cycle 2.97%
+Using /dev/video0 (yuyv422 1280x720@30)
+Saved test.jpg
+-0.2625
+[TARGET] Found target! X offset: -0.26, Degrees offset: -7.2°, Current angle: 9.3°, Target angle: 2.1°
+[MOVE] Setting angle to 0°, which maps to duty cycle 2.50%
+[MOVE] Setting angle to 0.0°, which maps to duty cycle 2.50%
+Using /dev/video0 (yuyv422 1280x720@30)
+Saved test.jpg
+-0.52734375
+[TARGET] Found target! X offset: -0.53, Degrees offset: -14.5°, Current angle: 0.0°, Target angle: -14.5°
+[MOVE] Setting angle to 0°, which maps to duty cycle 2.50%
+[MOVE] Setting angle to 0.0°, which maps to duty cycle 2.50%
+Using /dev/video0 (yuyv422 1280x720@30)
+Saved test.jpg
+[MOVE] Setting angle to 9.310344827586206°, which maps to duty cycle 2.97%
+Using /dev/video0 (yuyv422 1280x720@30)
+Saved test.jpg
+[MOVE] Setting angle to 18.620689655172413°, which maps to duty cycle 3.43%
+Using /dev/video0 (yuyv422 1280x720@30)
+Saved test.jpg
+-0.54609375
+[TARGET] Found target! X offset: -0.55, Degrees offset: -15.0°, Current angle: 18.6°, Target angle: 3.6°
+[MOVE] Setting angle to 0°, which maps to duty cycle 2.50%
+[MOVE] Setting angle to 0.0°, which maps to duty cycle 2.50%
+Using /dev/video0 (yuyv422 1280x720@30)
+Saved test.jpg
+[MOVE] Setting angle to 9.310344827586206°, which maps to duty cycle 2.97%
+Using /dev/video0 (yuyv422 1280x720@30)
+Saved test.jpg
+[MOVE] Setting angle to 18.620689655172413°, which maps to duty cycle 3.43%
+Using /dev/video0 (yuyv422 1280x720@30)
+Saved test.jpg
+-0.38984375
+[TARGET] Found target! X offset: -0.39, Degrees offset: -10.7°, Current angle: 18.6°, Target angle: 7.9°
+[MOVE] Setting angle to 0°, which maps to duty cycle 2.50%
+[MOVE] Setting angle to 0.0°, which maps to duty cycle 2.50%
+Using /dev/video0 (yuyv422 1280x720@30)
+Saved test.jpg
+[MOVE] Setting angle to 9.310344827586206°, which maps to duty cycle 2.97%
+Using /dev/video0 (yuyv422 1280x720@30)
+Saved test.jpg
+[MOVE] Setting angle to 18.620689655172413°, which maps to duty cycle 3.43%
+Using /dev/video0 (yuyv422 1280x720@30)
+Saved test.jpg
+-0.32109375
+[TARGET] Found target! X offset: -0.32, Degrees offset: -8.8°, Current angle: 18.6°, Target angle: 9.8°
+[MOVE] Setting angle to 0°, which maps to duty cycle 2.50%
+[MOVE] Setting angle to 0.0°, which maps to duty cycle 2.50%
+Using /dev/video0 (yuyv422 1280x720@30)
+Saved test.jpg
+-0.50546875
+[TARGET] Found target! X offset: -0.51, Degrees offset: -13.9°, Current angle: 0.0°, Target angle: -13.9°
+[MOVE] Setting angle to 0°, which maps to duty cycle 2.50%
+[MOVE] Setting angle to 0.0°, which maps to duty cycle 2.50%
+Using /dev/video0 (yuyv422 1280x720@30)
+Saved test.jpg
+[MOVE] Setting angle to 9.310344827586206°, which maps to duty cycle 2.97%
+Using /dev/video0 (yuyv422 1280x720@30)
+Saved test.jpg
+0.10390625
+[TARGET] Found target! X offset: 0.10, Degrees offset: 2.9°, Current angle: 9.3°, Target angle: 12.2°
+[MOVE] Setting angle to 0°, which maps to duty cycle 2.50%
+[MOVE] Setting angle to 0.0°, which maps to duty cycle 2.50%
+Using /dev/video0 (yuyv422 1280x720@30)
+Saved test.jpg
+0.06796875
+[TARGET] Found target! X offset: 0.07, Degrees offset: 1.9°, Current angle: 0.0°, Target angle: 1.9°
+[MOVE] Setting angle to 0°, which maps to duty cycle 2.50%
+[MOVE] Setting angle to 0.0°, which maps to duty cycle 2.50%
+Using /dev/video0 (yuyv422 1280x720@30)
+Saved test.jpg
+0.06796875
+[TARGET] Found target! X offset: 0.07, Degrees offset: 1.9°, Current angle: 0.0°, Target angle: 1.9°
+[MOVE] Setting angle to 0°, which maps to duty cycle 2.50%
+[MOVE] Setting angle to 0.0°, which maps to duty cycle 2.50%
+Using /dev/video0 (yuyv422 1280x720@30)
+
+[SHUTDOWN] Cleaning up GPIO...
+[SHUTDOWN] GPIO cleanup complete
+(venv) aclarke500@raspberrypi:~/Desktop/tflite-prac $ 
+

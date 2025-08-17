@@ -33,9 +33,9 @@ try:
         time.sleep(0.3)
 
     # back to 0° for taping
-    set_angle(0)
+    set_angle(135)
     time.sleep(1)
-    print("[CALIBRATE] Motor parked at 0°")
+    print("[CALIBRATE] Motor parked at 135°")
 
 finally:
     pwm.stop()

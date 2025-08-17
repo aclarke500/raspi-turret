@@ -13,6 +13,7 @@ Y_SERVO_PIN = 27  # GPIO 27 = Physical pin 13
 def cleanup_and_exit(signum, frame):
     print("\n[SHUTDOWN] Cleaning up GPIO...")
     pwm_x.stop()
+    pwm_y.stop()  # Add this line
     GPIO.cleanup()
     print("[SHUTDOWN] GPIO cleanup complete")
     sys.exit(0)
@@ -80,13 +81,13 @@ class Turret:
     def snap_to_target(self, offset_degrees):
         max_attempts = 5
         for _ in range(max_attempts):
-            self.set_angle(self.current_x_angle + offset_degrees)
+            self.set_x_angle(self.current_x_angle + offset_degrees)
             time.sleep(0.1)  # give model time to see new position
-            offset_of_target = get_target_direction()
-            if offset_of_target is None or abs(offset_of_target) < 0.05:
+            x_offset_of_target, y_offset_of_target = get_target_direction()
+            if x_offset_of_target is None or abs(x_offset_of_target) < 0.05:
                 time.sleep(10)
                 break  # close enough
-            offset_degrees = x_offset_to_degrees(offset_of_target)
+            offset_degrees = x_offset_to_degrees(x_offset_of_target)
 
 
 

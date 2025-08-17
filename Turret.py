@@ -84,7 +84,7 @@ class Turret:
             time.sleep(0.1)  # give model time to see new position
             offset_of_target = get_target_direction()
             if offset_of_target is None or abs(offset_of_target) < 0.05:
-                time.sleep(2)
+                time.sleep(10)
                 break  # close enough
             offset_degrees = x_offset_to_degrees(offset_of_target)
 

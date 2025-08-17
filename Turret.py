@@ -52,6 +52,7 @@ class Turret:
 
     def set_x_angle(self, angle):
          # Convert angle (0–180) to duty cycle
+        angle = max(0, min(270, angle))
         duty = (0.05 * angle) + 2.5
         print(f"[MOVE] Setting x angle to {angle}°, which maps to duty cycle {duty:.2f}%")
         pwm_x.ChangeDutyCycle(duty)
@@ -59,7 +60,7 @@ class Turret:
         time.sleep(0.1)
 
     def set_y_angle(self, angle):
-
+        angle = max(0, min(135, angle))
         duty = (0.05 * angle) + 2.5
         print(f"[MOVE] Setting y angle to {angle}°, which maps to duty cycle {duty:.2f}%")
         pwm_y.ChangeDutyCycle(duty)
@@ -94,14 +95,14 @@ class Turret:
         
     
     def snap_to_target(self, x_offset_degrees, y_offset_degrees):
-        max_attempts = 5
+        max_attempts = 100
         for _ in range(max_attempts):
             self.set_x_angle(self.current_x_angle + x_offset_degrees)
             self.set_y_angle(self.current_y_angle + y_offset_degrees)
             time.sleep(0.5)  # give model time to see new position
             x_offset_of_target, y_offset_of_target = get_target_direction()
             if x_offset_of_target is None or abs(x_offset_of_target) < 0.05:
-                time.sleep(10)
+                time.sleep(1/2)
                 break  # close enough
             offset_degrees = x_offset_to_degrees(x_offset_of_target)
 

@@ -77,7 +77,7 @@ class Turret:
                       f"Degrees offset: {degrees_offset:.1f}°, Current angle: {self.current_x_angle:.1f}°, "
                       f"Target angle: {target_angle:.1f}°")
                 return degrees_offset
-        return None
+        return None, None
     
     def snap_to_target(self, x_offset_degrees, y_offset_degrees):
         max_attempts = 5

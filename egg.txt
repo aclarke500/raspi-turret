@@ -1,0 +1,46 @@
+rrypi:~/Desktop/tflite-prac $ git pull
+remote: Enumerating objects: 5, done.
+remote: Counting objects: 100% (5/5), done.
+remote: Compressing objects: 100% (1/1), done.
+remote: Total 3 (delta 2), reused 3 (delta 2), pack-reused 0 (from 0)
+Unpacking objects: 100% (3/3), 287 bytes | 143.00 KiB/s, done.
+From https://github.com/aclarke500/raspi-turret
+   da78b6e..1117acf  main       -> origin/main
+Updating da78b6e..1117acf
+Fast-forward
+ Turret.py | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+(venv) aclarke500@raspberrypi:~/Desktop/tflite-prac $ python main.py 
+[INIT] Setting up GPIO mode...
+/home/aclarke500/Desktop/tflite-prac/Turret.py:27: RuntimeWarning: This channel is already in use, continuing anyway.  Use GPIO.setwarnings(False) to disable warnings.
+  GPIO.setup(X_SERVO_PIN, GPIO.OUT)
+/home/aclarke500/Desktop/tflite-prac/Turret.py:28: RuntimeWarning: This channel is already in use, continuing anyway.  Use GPIO.setwarnings(False) to disable warnings.
+  GPIO.setup(Y_SERVO_PIN, GPIO.OUT)
+[INIT] Starting PWM on pin 17 at 50Hz (20ms period)...
+Traceback (most recent call last):
+  File "/home/aclarke500/Desktop/tflite-prac/main.py", line 6, in <module>
+    T.setup()
+  File "/home/aclarke500/Desktop/tflite-prac/Turret.py", line 43, in setup
+    self.set_current_x_angle(0)
+    ^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'Turret' object has no attribute 'set_current_x_angle'. Did you mean: 'current_x_angle'?
+[EXIT] Releasing camera
+[WARN] Frame capture failed
+(venv) aclarke500@raspberrypi:~/Desktop/tflite-prac $ python main.py 
+[INIT] Setting up GPIO mode...
+/home/aclarke500/Desktop/tflite-prac/Turret.py:27: RuntimeWarning: This channel is already in use, continuing anyway.  Use GPIO.setwarnings(False) to disable warnings.
+  GPIO.setup(X_SERVO_PIN, GPIO.OUT)
+/home/aclarke500/Desktop/tflite-prac/Turret.py:28: RuntimeWarning: This channel is already in use, continuing anyway.  Use GPIO.setwarnings(False) to disable warnings.
+  GPIO.setup(Y_SERVO_PIN, GPIO.OUT)
+[INIT] Starting PWM on pin 17 at 50Hz (20ms period)...
+Traceback (most recent call last):
+  File "/home/aclarke500/Desktop/tflite-prac/main.py", line 6, in <module>
+    T.setup()
+  File "/home/aclarke500/Desktop/tflite-prac/Turret.py", line 43, in setup
+    self.set_current_x_angle(0)
+    ^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'Turret' object has no attribute 'set_current_x_angle'. Did you mean: 'current_x_angle'?
+[EXIT] Releasing camera
+[WARN] Frame capture failed
+(venv) aclarke500@raspberrypi:~/Desktop/tflite-prac $ 
+

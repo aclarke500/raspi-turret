@@ -24,6 +24,7 @@ signal.signal(signal.SIGTERM, cleanup_and_exit)  # Termination signal
 
 print("[INIT] Setting up GPIO mode...")
 GPIO.setmode(GPIO.BCM)
+GPIO.setwarnings(False)  # Suppress GPIO warnings
 GPIO.setup(X_SERVO_PIN, GPIO.OUT)
 GPIO.setup(Y_SERVO_PIN, GPIO.OUT)
 
@@ -36,12 +37,13 @@ pwm_y.start(0)  # initial duty cycle
 class Turret:
     def __init__(self):
         self.current_x_angle = 0
+        self.current_y_angle = 0
         self.X_SERVO_PIN = X_SERVO_PIN
         self.target_location = None
 
     def setup(self):
-        self.set_current_x_angle(0)
-        self.set_current_y_angle(0)
+        self.set_x_angle(0)
+        self.set_y_angle(0)
 
     def cleanup(self):
         pwm_x.stop()
@@ -115,7 +117,7 @@ class Turret:
             frames_without_target = 0
             offset_degrees = x_offset_to_degrees(x_offset_of_target)
             if abs(offset_degrees) < 0.1:
-                print(f"[TARGET] Found target! X offset: {x_offset_of_target:.2f}, " 
+                print(f"[TARGET] Target acquired! X offset: {x_offset_of_target:.2f}, " 
                       f"Degrees offset: {offset_degrees:.1f}°, Current angle: {self.current_x_angle:.1f}°, "
                       f"Target angle: {self.current_x_angle + offset_degrees:.1f}°")
                 time.sleep(0.5)

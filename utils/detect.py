@@ -70,10 +70,10 @@ def get_target_direction():
                 print(f"x_normalized: {x_normalized}, y_normalized: {y_normalized}  ")
                 return x_normalized, y_normalized
 
-        return None
+        return None, None
     except Exception as e:
         print(f"[ERROR] get_target_direction failed: {e}")
-        return None
+        return None, None
 
 def is_in_safezone(x):
     degrees = 135 * abs(x)

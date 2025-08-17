@@ -36,6 +36,7 @@ with open(Path.home() / "tflite_models" / "coco_labels.txt") as f:
     labels = f.read().splitlines()
 def get_target_direction():
     try:
+        time.sleep(0.05)
         print('Trying to get frame')
         frame = get_current_frame()
         # Resize to model input shape

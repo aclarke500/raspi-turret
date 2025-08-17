@@ -40,8 +40,8 @@ class Turret:
         self.target_location = None
 
     def setup(self):
-        self.set_x_angle(0)
-        self.set_y_angle(0)
+        self.set_current_x_angle(0)
+        self.set_current_y_angle(0)
 
     def cleanup(self):
         pwm_x.stop()

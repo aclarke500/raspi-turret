@@ -85,7 +85,7 @@ class Turret:
                 return x_offset_of_target, y_offset_of_target
         return None, None
 
-    def traverse():
+    def traverse(self):
         angles = [0, 30, 60, 90, 120, 150, 200, 270]
         for angle in angles:
             self.set_x_angle(angle)

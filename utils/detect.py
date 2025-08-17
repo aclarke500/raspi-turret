@@ -6,6 +6,7 @@ import subprocess
 import time
 import RPi.GPIO as GPIO
 from utils.camera import current_frame
+import cv2
 
 
 # # Pin config

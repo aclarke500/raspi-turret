@@ -60,6 +60,7 @@ class Turret:
         time.sleep(0.1)
 
     def set_y_angle(self, angle):
+        return # we have disabled y servo for now
         angle = max(0, min(135, angle))
         duty = (0.05 * angle) + 2.5
         print(f"[MOVE] Setting y angle to {angle}°, which maps to duty cycle {duty:.2f}%")
@@ -99,12 +100,21 @@ class Turret:
         for _ in range(max_attempts):
             self.set_x_angle(self.current_x_angle + x_offset_degrees)
             self.set_y_angle(self.current_y_angle + y_offset_degrees)
-            time.sleep(0.5)  # give model time to see new position
+            time.sleep(0.1)  # give model time to see new position
             x_offset_of_target, y_offset_of_target = get_target_direction()
-            if x_offset_of_target is None or abs(x_offset_of_target) < 0.05:
-                time.sleep(1/2)
-                break  # close enough
+            if x_offset_of_target is None:
+                break
+                time.sleep(0.5)
+                continue
             offset_degrees = x_offset_to_degrees(x_offset_of_target)
+            if abs(offset_degrees) < 0.05:
+                print(f"[TARGET] Found target! X offset: {x_offset_of_target:.2f}, " 
+                      f"Degrees offset: {offset_degrees:.1f}°, Current angle: {self.current_x_angle:.1f}°, "
+                      f"Target angle: {self.current_x_angle + offset_degrees:.1f}°")
+                time.sleep(0.5)
+                continue
+            time.sleep(0.5)
+        return x_offset_of_target, y_offset_of_target
 
 
 

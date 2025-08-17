@@ -15,5 +15,5 @@ def update_frame():
 t = threading.Thread(target=update_frame, daemon=True)
 t.start()
 
-def get_frame():
+def get_current_frame():
     return current_frame

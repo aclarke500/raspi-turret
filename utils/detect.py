@@ -5,6 +5,7 @@ from pathlib import Path
 import subprocess
 import time
 import RPi.GPIO as GPIO
+from utils.camera import current_frame
 
 
 # # Pin config

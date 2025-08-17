@@ -5,7 +5,8 @@ from pathlib import Path
 import subprocess
 import time
 import RPi.GPIO as GPIO
-from utils.camera import current_frame
+from utils.camera import get_current_frame
+
 import cv2
 
 
@@ -33,50 +34,42 @@ output_details = interpreter.get_output_details()
 
 with open(Path.home() / "tflite_models" / "coco_labels.txt") as f:
     labels = f.read().splitlines()
-
 def get_target_direction():
     try:
-        # take photo
-        subprocess.run(
-            "SIZE=1280x720 FPS=30 bash photo.sh /dev/video0",
-            shell=True, check=True
-        )
-
-        img = Image.open("test.jpg").resize((300, 300))
-        input_data = np.expand_dims(np.array(img, dtype=np.uint8), axis=0)
+        print('Trying to get frame')
+        frame = get_current_frame()
+        # Resize to model input shape
+        img_resized = cv2.resize(frame, (300, 300))
+        input_data = np.expand_dims(img_resized.astype(np.uint8), axis=0)
 
         interpreter.set_tensor(input_details[0]['index'], input_data)
         interpreter.invoke()
 
         boxes = interpreter.get_tensor(output_details[0]['index'])[0]
         classes = interpreter.get_tensor(output_details[1]['index'])[0]
-        scores = interpreter.get_tensor(output_details[2]['index'])[0]        
-        # open image again to get original size
-        orig_img = Image.open("test.jpg")
-        width, height = orig_img.size
+        scores = interpreter.get_tensor(output_details[2]['index'])[0]
+
+        height, width, _ = frame.shape
         target = (width / 2, height / 2)
 
         for i in range(len(scores)):
             if scores[i] > 0.5 and labels[int(classes[i])] == "person":
+                print('found person')
                 ymin, xmin, ymax, xmax = boxes[i]
-                
-                # scale bounding box to pixel coordinates
+
                 left = int(xmin * width)
                 top = int(ymin * height)
                 right = int(xmax * width)
                 bottom = int(ymax * height)
 
-                # compute center of the bounding box
                 person_center = ((left + right) / 2, (top + bottom) / 2)
 
-                # compute vector from target to person center
                 vector = (person_center[0] - target[0], person_center[1] - target[1])
-
                 x_normalized = vector[0] / (width / 2)
                 print(x_normalized)
                 return x_normalized
 
-        return None  # No person found
+        return None
     except Exception as e:
         print(f"[ERROR] get_target_direction failed: {e}")
         return None
@@ -88,28 +81,3 @@ def is_in_safezone(x):
         print("not valid: ", degrees, " degrees.")
     return degrees <= 20
 
-
-# def sweep_left():
-#     set_angle(0)
-#     angles_to_check = np.linspace(0, 270, 30)
-#     reverse = np.linspace(270, 0, 30)
-#     print("sweep a")
-#     for angle in angles_to_check:
-#         print(angle)
-#         set_angle(angle)
-#     print("sweep b")
-#     for a in reverse:
-#         set_angle(a)
-#         print(a)
-
-    
-
-# base = 135
-# set_angle(base)
-# for i in range(1000):
-#     sweep_left()
-    
-#     # x=get_target_direction()
-#     # if x is not None and not is_in_safezone(x):
-#     #     angle = base - (x * 45)
-#     #     set_angle(angle)

@@ -97,7 +97,8 @@ class Turret:
     
     def snap_to_target(self, x_offset_degrees, y_offset_degrees):
         max_attempts = 100
-        for _ in range(max_attempts):
+        for i in range(max_attempts):
+            print("Snapping to target iteration", i)
             self.set_x_angle(self.current_x_angle + x_offset_degrees)
             self.set_y_angle(self.current_y_angle + y_offset_degrees)
             time.sleep(0.1)  # give model time to see new position
@@ -107,7 +108,7 @@ class Turret:
                 time.sleep(0.5)
                 continue
             offset_degrees = x_offset_to_degrees(x_offset_of_target)
-            if abs(offset_degrees) < 0.05:
+            if abs(offset_degrees) < 0.1:
                 print(f"[TARGET] Found target! X offset: {x_offset_of_target:.2f}, " 
                       f"Degrees offset: {offset_degrees:.1f}°, Current angle: {self.current_x_angle:.1f}°, "
                       f"Target angle: {self.current_x_angle + offset_degrees:.1f}°")

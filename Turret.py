@@ -109,7 +109,7 @@ class Turret:
             if x_offset_of_target is None:
                 print("No target found")
                 frames_without_target += 1
-                if frames_without_target > 10:
+                if frames_without_target > 1:
                     break
                 time.sleep(0.5)
                 continue

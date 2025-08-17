@@ -78,6 +78,14 @@ class Turret:
                       f"Target angle: {target_angle:.1f}°")
                 return x_offset_of_target, y_offset_of_target
         return None, None
+
+    def traverse():
+        angles = [0, 30, 60, 90, 120, 150, 200, 270]
+        for angle in angles:
+            self.set_x_angle(angle)
+            self.set_y_angle(angle)
+        
+        
     
     def snap_to_target(self, x_offset_degrees, y_offset_degrees):
         max_attempts = 5

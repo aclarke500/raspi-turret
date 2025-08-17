@@ -66,8 +66,9 @@ def get_target_direction():
 
                 vector = (person_center[0] - target[0], person_center[1] - target[1])
                 x_normalized = vector[0] / (width / 2)
-                print(x_normalized)
-                return x_normalized
+                y_normalized = vector[1] / (height / 2)
+                print(f"x_normalized: {x_normalized}, y_normalized: {y_normalized}  ")
+                return x_normalized, y_normalized
 
         return None
     except Exception as e:

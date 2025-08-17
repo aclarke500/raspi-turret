@@ -7,11 +7,12 @@ import sys
 from utils.detect import get_target_direction
 from utils.utils import x_offset_to_degrees
 
-SERVO_PIN = 17  # GPIO 17 = Physical pin 11
+X_SERVO_PIN = 17  # GPIO 17 = Physical pin 11
+Y_SERVO_PIN = 27  # GPIO 27 = Physical pin 13
 
 def cleanup_and_exit(signum, frame):
     print("\n[SHUTDOWN] Cleaning up GPIO...")
-    pwm.stop()
+    pwm_x.stop()
     GPIO.cleanup()
     print("[SHUTDOWN] GPIO cleanup complete")
     sys.exit(0)
@@ -22,43 +23,55 @@ signal.signal(signal.SIGTERM, cleanup_and_exit)  # Termination signal
 
 print("[INIT] Setting up GPIO mode...")
 GPIO.setmode(GPIO.BCM)
-GPIO.setup(SERVO_PIN, GPIO.OUT)
+GPIO.setup(X_SERVO_PIN, GPIO.OUT)
+GPIO.setup(Y_SERVO_PIN, GPIO.OUT)
 
 print("[INIT] Starting PWM on pin 17 at 50Hz (20ms period)...")
-pwm = GPIO.PWM(SERVO_PIN, 50)  # 50Hz for servo control
-pwm.start(0)  # initial duty cycle
+pwm_x = GPIO.PWM(X_SERVO_PIN, 50)  # 50Hz for servo control
+pwm_x.start(0)  # initial duty cycle
+pwm_y = GPIO.PWM(Y_SERVO_PIN, 50)  # 50Hz for servo control
+pwm_y.start(0)  # initial duty cycle
 
 class Turret:
     def __init__(self):
         self.current_x_angle = 0
-        self.SERVO_PIN = SERVO_PIN
+        self.X_SERVO_PIN = X_SERVO_PIN
         self.target_location = None
 
     def setup(self):
-        self.set_angle(0)
+        self.set_x_angle(0)
+        self.set_y_angle(0)
 
 
-    def set_angle(self, angle):
+    def set_x_angle(self, angle):
          # Convert angle (0–180) to duty cycle
         duty = (0.05 * angle) + 2.5
-        print(f"[MOVE] Setting angle to {angle}°, which maps to duty cycle {duty:.2f}%")
-        pwm.ChangeDutyCycle(duty)
+        print(f"[MOVE] Setting x angle to {angle}°, which maps to duty cycle {duty:.2f}%")
+        pwm_x.ChangeDutyCycle(duty)
         self.current_x_angle = angle
         time.sleep(0.1)
 
+    def set_y_angle(self, angle):
+
+        duty = (0.05 * angle) + 2.5
+        print(f"[MOVE] Setting y angle to {angle}°, which maps to duty cycle {duty:.2f}%")
+        pwm_y.ChangeDutyCycle(duty)
+        self.current_y_angle = angle
+        time.sleep(0.1)
+
     def patrol(self):
-        self.set_angle(0)
+        self.set_x_angle(0)
         left_to_right = np.linspace(0, 270, 30)
         right_to_left  = np.linspace(270, 0, 30)
         angles = np.concatenate([left_to_right, right_to_left])
         for angle in angles:
-            self.set_angle(angle)
+            self.set_x_angle(angle)
             # returns offset [-1, 1] or None if no one is seen
-            offset_of_target = get_target_direction()
-            if not offset_of_target is None:
-                degrees_offset = x_offset_to_degrees(offset_of_target)
+            x_offset_of_target, y_offset_of_target = get_target_direction()
+            if not x_offset_of_target is None:
+                degrees_offset = x_offset_to_degrees(x_offset_of_target)
                 target_angle = self.current_x_angle + degrees_offset
-                print(f"[TARGET] Found target! X offset: {offset_of_target:.2f}, " 
+                print(f"[TARGET] Found target! X offset: {x_offset_of_target:.2f}, " 
                       f"Degrees offset: {degrees_offset:.1f}°, Current angle: {self.current_x_angle:.1f}°, "
                       f"Target angle: {target_angle:.1f}°")
                 return degrees_offset

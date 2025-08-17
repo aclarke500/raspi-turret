@@ -2,7 +2,7 @@ import RPi.GPIO as GPIO
 import time
 
 # Pin config
-SERVO_PIN = 17  # GPIO 17 = Physical pin 11
+SERVO_PIN = 27  # GPIO 17 = Physical pin 11
 
 print("[INIT] Setting up GPIO mode...")
 GPIO.setmode(GPIO.BCM)

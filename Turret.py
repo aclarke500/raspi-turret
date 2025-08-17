@@ -62,6 +62,7 @@ class Turret:
 
     def patrol(self):
         self.set_x_angle(0)
+        self.set_y_angle(0)
         left_to_right = np.linspace(0, 270, 30)
         right_to_left  = np.linspace(270, 0, 30)
         angles = np.concatenate([left_to_right, right_to_left])
@@ -78,11 +79,12 @@ class Turret:
                 return degrees_offset
         return None
     
-    def snap_to_target(self, offset_degrees):
+    def snap_to_target(self, x_offset_degrees, y_offset_degrees):
         max_attempts = 5
         for _ in range(max_attempts):
-            self.set_x_angle(self.current_x_angle + offset_degrees)
-            time.sleep(0.1)  # give model time to see new position
+            self.set_x_angle(self.current_x_angle + x_offset_degrees)
+            self.set_y_angle(self.current_y_angle + y_offset_degrees)
+            time.sleep(0.5)  # give model time to see new position
             x_offset_of_target, y_offset_of_target = get_target_direction()
             if x_offset_of_target is None or abs(x_offset_of_target) < 0.05:
                 time.sleep(10)

@@ -43,6 +43,12 @@ class Turret:
         self.set_x_angle(0)
         self.set_y_angle(0)
 
+    def cleanup(self):
+        pwm_x.stop()
+        pwm_y.stop()
+        GPIO.cleanup()
+        print("[SHUTDOWN] Cleanup done.")
+
 
     def set_x_angle(self, angle):
          # Convert angle (0–180) to duty cycle

@@ -1,127 +1,227 @@
-angle to 0°, which maps to duty cycle 2.50%
-[MOVE] Setting y angle to 0°, which maps to duty cycle 2.50%
-[MOVE] Setting x angle to 0°, which maps to duty cycle 2.50%
-[MOVE] Setting y angle to 0°, which maps to duty cycle 2.50%
-[MOVE] Setting x angle to 0.0°, which maps to duty cycle 2.50%
+[INIT] Setting up GPIO mode...
+[INIT] Starting PWM on pin 17 at 50Hz (20ms period)...
 Trying to get frame
-[MOVE] Setting x angle to 9.310344827586206°, which maps to duty cycle 2.97%
 Trying to get frame
-[MOVE] Setting x angle to 18.620689655172413°, which maps to duty cycle 3.43%
 Trying to get frame
-[MOVE] Setting x angle to 27.93103448275862°, which maps to duty cycle 3.90%
 Trying to get frame
-[MOVE] Setting x angle to 37.241379310344826°, which maps to duty cycle 4.36%
 Trying to get frame
-[MOVE] Setting x angle to 46.55172413793103°, which maps to duty cycle 4.83%
 Trying to get frame
-[MOVE] Setting x angle to 55.86206896551724°, which maps to duty cycle 5.29%
 Trying to get frame
-[MOVE] Setting x angle to 65.17241379310344°, which maps to duty cycle 5.76%
 Trying to get frame
-[MOVE] Setting x angle to 74.48275862068965°, which maps to duty cycle 6.22%
 Trying to get frame
-[MOVE] Setting x angle to 83.79310344827586°, which maps to duty cycle 6.69%
 Trying to get frame
-[MOVE] Setting x angle to 93.10344827586206°, which maps to duty cycle 7.16%
 Trying to get frame
-[MOVE] Setting x angle to 102.41379310344827°, which maps to duty cycle 7.62%
-Trying to get frame
-[MOVE] Setting x angle to 111.72413793103448°, which maps to duty cycle 8.09%
-Trying to get frame
-[MOVE] Setting x angle to 121.03448275862068°, which maps to duty cycle 8.55%
-Trying to get frame
-[MOVE] Setting x angle to 130.3448275862069°, which maps to duty cycle 9.02%
-Trying to get frame
-[MOVE] Setting x angle to 139.65517241379308°, which maps to duty cycle 9.48%
-Trying to get frame
-[MOVE] Setting x angle to 148.9655172413793°, which maps to duty cycle 9.95%
-Trying to get frame
-[MOVE] Setting x angle to 158.27586206896552°, which maps to duty cycle 10.41%
-Trying to get frame
-[MOVE] Setting x angle to 167.58620689655172°, which maps to duty cycle 10.88%
-Trying to get frame
-[MOVE] Setting x angle to 176.8965517241379°, which maps to duty cycle 11.34%
-Trying to get frame
-[MOVE] Setting x angle to 186.20689655172413°, which maps to duty cycle 11.81%
-Trying to get frame
-[MOVE] Setting x angle to 195.51724137931035°, which maps to duty cycle 12.28%
-Trying to get frame
-[MOVE] Setting x angle to 204.82758620689654°, which maps to duty cycle 12.74%
-Trying to get frame
-[MOVE] Setting x angle to 214.13793103448273°, which maps to duty cycle 13.21%
-Trying to get frame
-[MOVE] Setting x angle to 223.44827586206895°, which maps to duty cycle 13.67%
-Trying to get frame
-[MOVE] Setting x angle to 232.75862068965517°, which maps to duty cycle 14.14%
-Trying to get frame
-[MOVE] Setting x angle to 242.06896551724137°, which maps to duty cycle 14.60%
-Trying to get frame
-[MOVE] Setting x angle to 251.37931034482756°, which maps to duty cycle 15.07%
-Trying to get frame
-[MOVE] Setting x angle to 260.6896551724138°, which maps to duty cycle 15.53%
-Trying to get frame
-[MOVE] Setting x angle to 270.0°, which maps to duty cycle 16.00%
-Trying to get frame
-[MOVE] Setting x angle to 270.0°, which maps to duty cycle 16.00%
-Trying to get frame
-[MOVE] Setting x angle to 260.6896551724138°, which maps to duty cycle 15.53%
-Trying to get frame
-[MOVE] Setting x angle to 251.3793103448276°, which maps to duty cycle 15.07%
-Trying to get frame
-[MOVE] Setting x angle to 242.0689655172414°, which maps to duty cycle 14.60%
-Trying to get frame
-[MOVE] Setting x angle to 232.75862068965517°, which maps to duty cycle 14.14%
-Trying to get frame
-[MOVE] Setting x angle to 223.44827586206895°, which maps to duty cycle 13.67%
-Trying to get frame
-[MOVE] Setting x angle to 214.13793103448276°, which maps to duty cycle 13.21%
-Trying to get frame
-[MOVE] Setting x angle to 204.82758620689657°, which maps to duty cycle 12.74%
-Trying to get frame
-[MOVE] Setting x angle to 195.51724137931035°, which maps to duty cycle 12.28%
-Trying to get frame
-[MOVE] Setting x angle to 186.20689655172413°, which maps to duty cycle 11.81%
-Trying to get frame
-[MOVE] Setting x angle to 176.89655172413794°, which maps to duty cycle 11.34%
-Trying to get frame
-[MOVE] Setting x angle to 167.58620689655174°, which maps to duty cycle 10.88%
-Trying to get frame
-[MOVE] Setting x angle to 158.27586206896552°, which maps to duty cycle 10.41%
-Trying to get frame
-[MOVE] Setting x angle to 148.9655172413793°, which maps to duty cycle 9.95%
-Trying to get frame
-[MOVE] Setting x angle to 139.6551724137931°, which maps to duty cycle 9.48%
-Trying to get frame
-[MOVE] Setting x angle to 130.34482758620692°, which maps to duty cycle 9.02%
-Trying to get frame
-[MOVE] Setting x angle to 121.0344827586207°, which maps to duty cycle 8.55%
-Trying to get frame
-[MOVE] Setting x angle to 111.72413793103448°, which maps to duty cycle 8.09%
-Trying to get frame
-[MOVE] Setting x angle to 102.41379310344828°, which maps to duty cycle 7.62%
-Trying to get frame
-[MOVE] Setting x angle to 93.10344827586209°, which maps to duty cycle 7.16%
-Trying to get frame
-[MOVE] Setting x angle to 83.79310344827587°, which maps to duty cycle 6.69%
-Trying to get frame
-[MOVE] Setting x angle to 74.48275862068965°, which maps to duty cycle 6.22%
-Trying to get frame
-[MOVE] Setting x angle to 65.17241379310346°, which maps to duty cycle 5.76%
-Trying to get frame
-[MOVE] Setting x angle to 55.86206896551727°, which maps to duty cycle 5.29%
-Trying to get frame
-[MOVE] Setting x angle to 46.551724137931046°, which maps to duty cycle 4.83%
-Trying to get frame
-[MOVE] Setting x angle to 37.241379310344826°, which maps to duty cycle 4.36%
 Trying to get frame
 found person
-x_normalized: -0.0296875, y_normalized: -0.008333333333333333  
-[TARGET] Found target! X offset: -0.03, Degrees offset: 0.7°, Current angle: 37.2°, Target angle: 38.0°
-Traceback (most recent call last):
-  File "/home/aclarke500/Desktop/tflite-prac/main.py", line 6, in <module>
-    x_offset_degrees, y_offset_degrees = T.patrol()
-    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-TypeError: cannot unpack non-iterable float object
-(venv) aclarke500@raspberrypi:~/Desktop/tflite-prac $ 
-
-
+x_normalized: 0.0375, y_normalized: 0.0375  
+[TARGET] Found target! X offset: 0.04, Degrees offset: 0.9°, Current angle: 102.4°, Target angle: 103.3°
+Trying to get frame
+found person
+x_normalized: -0.00703125, y_normalized: -0.006944444444444444  
+[TARGET] Found target! X offset: -0.01, Degrees offset: -0.2°, Current angle: 0.0°, Target angle: -0.2°
+Trying to get frame
+Trying to get frame
+Trying to get frame
+Trying to get frame
+Trying to get frame
+found person
+x_normalized: -0.53046875, y_normalized: 0.5222222222222223  
+[TARGET] Found target! X offset: -0.53, Degrees offset: -12.9°, Current angle: 37.2°, Target angle: 24.3°
+Trying to get frame
+Trying to get frame
+Trying to get frame
+Trying to get frame
+Trying to get frame
+Trying to get frame
+found person
+x_normalized: -0.27578125, y_normalized: 0.006944444444444444  
+[TARGET] Found target! X offset: -0.28, Degrees offset: -6.7°, Current angle: 46.6°, Target angle: 39.8°
+Trying to get frame
+Trying to get frame
+Trying to get frame
+Trying to get frame
+Trying to get frame
+Trying to get frame
+found person
+x_normalized: -0.23125, y_normalized: 0.008333333333333333  
+[TARGET] Found target! X offset: -0.23, Degrees offset: -5.6°, Current angle: 46.6°, Target angle: 40.9°
+Trying to get frame
+found person
+x_normalized: -0.00703125, y_normalized: -0.006944444444444444  
+[TARGET] Found target! X offset: -0.01, Degrees offset: -0.2°, Current angle: 0.0°, Target angle: -0.2°
+Trying to get frame
+Trying to get frame
+Trying to get frame
+Trying to get frame
+Trying to get frame
+Trying to get frame
+Trying to get frame
+[ERROR] get_target_direction failed: list index out of range
+Trying to get frame
+Trying to get frame
+found person
+x_normalized: -0.1265625, y_normalized: 0.022222222222222223  
+[TARGET] Found target! X offset: -0.13, Degrees offset: -3.1°, Current angle: 74.5°, Target angle: 71.4°
+Trying to get frame
+Trying to get frame
+Trying to get frame
+Trying to get frame
+Trying to get frame
+Trying to get frame
+Trying to get frame
+Trying to get frame
+Trying to get frame
+Trying to get frame
+Trying to get frame
+Trying to get frame
+Trying to get frame
+Trying to get frame
+Trying to get frame
+Trying to get frame
+Trying to get frame
+Trying to get frame
+Trying to get frame
+Trying to get frame
+Trying to get frame
+Trying to get frame
+Trying to get frame
+Trying to get frame
+Trying to get frame
+Trying to get frame
+Trying to get frame
+Trying to get frame
+Trying to get frame
+Trying to get frame
+Trying to get frame
+Trying to get frame
+Trying to get frame
+Trying to get frame
+Trying to get frame
+Trying to get frame
+Trying to get frame
+Trying to get frame
+Trying to get frame
+Trying to get frame
+Trying to get frame
+Trying to get frame
+found person
+x_normalized: 0.18828125, y_normalized: 0.006944444444444444  
+[TARGET] Found target! X offset: 0.19, Degrees offset: 4.6°, Current angle: 167.6°, Target angle: 172.2°
+Trying to get frame
+Trying to get frame
+Trying to get frame
+Trying to get frame
+Trying to get frame
+Trying to get frame
+Trying to get frame
+Trying to get frame
+Trying to get frame
+Trying to get frame
+Trying to get frame
+Trying to get frame
+Trying to get frame
+Trying to get frame
+Trying to get frame
+Trying to get frame
+Trying to get frame
+Trying to get frame
+Trying to get frame
+Trying to get frame
+Trying to get frame
+Trying to get frame
+Trying to get frame
+Trying to get frame
+Trying to get frame
+Trying to get frame
+Trying to get frame
+Trying to get frame
+Trying to get frame
+Trying to get frame
+Trying to get frame
+Trying to get frame
+Trying to get frame
+Trying to get frame
+Trying to get frame
+Trying to get frame
+Trying to get frame
+Trying to get frame
+Trying to get frame
+Trying to get frame
+Trying to get frame
+Trying to get frame
+Trying to get frame
+Trying to get frame
+Trying to get frame
+Trying to get frame
+Trying to get frame
+Trying to get frame
+Trying to get frame
+Trying to get frame
+Trying to get frame
+Trying to get frame
+Trying to get frame
+Trying to get frame
+Trying to get frame
+Trying to get frame
+Trying to get frame
+Trying to get frame
+Trying to get frame
+Trying to get frame
+Trying to get frame
+Trying to get frame
+Trying to get frame
+Trying to get frame
+Trying to get frame
+Trying to get frame
+Trying to get frame
+Trying to get frame
+Trying to get frame
+Trying to get frame
+Trying to get frame
+Trying to get frame
+Trying to get frame
+Trying to get frame
+Trying to get frame
+Trying to get frame
+Trying to get frame
+Trying to get frame
+Trying to get frame
+Trying to get frame
+Trying to get frame
+Trying to get frame
+Trying to get frame
+Trying to get frame
+Trying to get frame
+Trying to get frame
+Trying to get frame
+Trying to get frame
+Trying to get frame
+Trying to get frame
+Trying to get frame
+Trying to get frame
+Trying to get frame
+Trying to get frame
+Trying to get frame
+Trying to get frame
+Trying to get frame
+Trying to get frame
+Trying to get frame
+Trying to get frame
+Trying to get frame
+Trying to get frame
+Trying to get frame
+Trying to get frame
+Trying to get frame
+Trying to get frame
+found person
+x_normalized: -0.08125, y_normalized: 0.008333333333333333  
+[TARGET] Found target! X offset: -0.08, Degrees offset: -2.0°, Current angle: 130.3°, Target angle: 128.4°
+Trying to get frame
+Trying to get frame
+Trying to get frame
+found person
+x_normalized: 0.02734375, y_normalized: -0.0875  
+[TARGET] Found target! X offset: 0.03, Degrees offset: 0.7°, Current angle: 18.6°, Target angle: 19.3°
+[SHUTDOWN] Cleanup done.
+[EXIT] Releasing camera
+[WARN] Frame capture failed

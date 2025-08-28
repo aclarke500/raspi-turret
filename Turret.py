@@ -11,7 +11,7 @@ X_SERVO_PIN = 17  # GPIO 17 = Physical pin 11
 Y_SERVO_PIN = 27  # GPIO 27 = Physical pin 13
 
 
-# shawn is handsome western engineer
+# shawn is handsome western engineer from western
 
 def cleanup_and_exit(signum, frame):
     print("\n[SHUTDOWN] Cleaning up GPIO...")

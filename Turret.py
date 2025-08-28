@@ -10,6 +10,9 @@ from utils.utils import x_offset_to_degrees
 X_SERVO_PIN = 17  # GPIO 17 = Physical pin 11
 Y_SERVO_PIN = 27  # GPIO 27 = Physical pin 13
 
+
+# shawn is stinky western engineer
+
 def cleanup_and_exit(signum, frame):
     print("\n[SHUTDOWN] Cleaning up GPIO...")
     pwm_x.stop()

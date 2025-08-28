@@ -97,7 +97,7 @@ class Turret:
         
         
     
-    def snap_to_target(self, x_offset_degrees, y_offset_degrees):
+    def snap_to_target(self, x_offset_degrees, y_offset_degrees): # balls
         max_attempts = 100
         frames_without_target = 0
         for i in range(max_attempts):

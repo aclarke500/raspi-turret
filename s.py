@@ -1,28 +1,26 @@
-import RPi.GPIO as GPIO
+import pigpio
 import time
 
 SERVO_PIN = 17
-GPIO.setmode(GPIO.BCM)
-GPIO.setup(SERVO_PIN, GPIO.OUT)
-
-pwm = GPIO.PWM(SERVO_PIN, 50)  # 50Hz
-pwm.start(0)  # Start with no pulse
+pi = pigpio.pi()
+if not pi.connected:
+    exit()
 
 try:
     while True:
-        print("[TEST] Moving to 0° (2.5% duty)")
-        pwm.ChangeDutyCycle(2.5)  # ~500µs
+        print("[TEST] 0° (500µs)")
+        pi.set_servo_pulsewidth(SERVO_PIN, 500)
         time.sleep(1.5)
 
-        print("[TEST] Moving to 135° (7.5% duty - neutral)")
-        pwm.ChangeDutyCycle(7.5)  # ~1500µs
+        print("[TEST] 135° (1500µs)")
+        pi.set_servo_pulsewidth(SERVO_PIN, 1500)
         time.sleep(1.5)
 
-        print("[TEST] Moving to 270° (12.5% duty)")
-        pwm.ChangeDutyCycle(12.5)  # ~2500µs
+        print("[TEST] 270° (2500µs)")
+        pi.set_servo_pulsewidth(SERVO_PIN, 2500)
         time.sleep(1.5)
 
 except KeyboardInterrupt:
-    pwm.stop()
-    GPIO.cleanup()
+    pi.set_servo_pulsewidth(SERVO_PIN, 0)
+    pi.stop()
     print("[EXIT] Cleaned up.")

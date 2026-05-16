@@ -11,7 +11,7 @@ Prerequisites (on Pi):
 Run from repo root:
   python hardware_tests/ai_test.py
 
-Offsets are normalized from frame center: x,y in roughly [-1, 1].
+Runs for up to 5 minutes or until Ctrl+C. Offsets are normalized from frame center: x,y in roughly [-1, 1].
   (0, 0) = person at center; +x = right; +y = below center (image Y down).
 """
 import sys
@@ -26,7 +26,7 @@ from utils.camera import get_current_frame
 from utils.detect import get_target_direction
 from utils.utils import x_offset_to_degrees, y_offset_to_degrees
 
-NUM_SAMPLES = 10
+RUN_DURATION_SEC = 5 * 60
 INTERVAL_SEC = 0.2
 CAMERA_WAIT_SEC = 3.0
 CAMERA_POLL_SEC = 0.1
@@ -66,31 +66,40 @@ def main():
     print("[INIT] Camera ready")
 
     seen_person = False
-    print(f"[RUN] {NUM_SAMPLES} detections ({INTERVAL_SEC}s apart)")
+    end_time = time.monotonic() + RUN_DURATION_SEC
+    print(
+        f"[RUN] Detecting for up to {RUN_DURATION_SEC // 60} min "
+        f"({INTERVAL_SEC}s apart); Ctrl+C to stop early"
+    )
 
-    for i in range(1, NUM_SAMPLES + 1):
-        x, y = get_target_direction()
-        label = f"{i:02d}"
+    i = 0
+    try:
+        while time.monotonic() < end_time:
+            i += 1
+            x, y = get_target_direction()
+            label = f"{i:04d}"
 
-        if x is None or y is None:
-            print(f"[{label}] NO_PERSON")
-        else:
-            seen_person = True
-            hint = _position_hint(x, y)
-            deg_x = x_offset_to_degrees(x)
-            deg_y = y_offset_to_degrees(y)
-            print(
-                f"[{label}] PERSON  x={x:+.3f}  y={y:+.3f}  "
-                f"({hint})  pan={deg_x:+.1f}°  tilt={deg_y:+.1f}°"
-            )
+            if x is None or y is None:
+                print(f"[{label}] NO_PERSON")
+            else:
+                seen_person = True
+                hint = _position_hint(x, y)
+                deg_x = x_offset_to_degrees(x)
+                deg_y = y_offset_to_degrees(y)
+                print(
+                    f"[{label}] PERSON  x={x:+.3f}  y={y:+.3f}  "
+                    f"({hint})  pan={deg_x:+.1f}°  tilt={deg_y:+.1f}°"
+                )
 
-        if i < NUM_SAMPLES:
-            time.sleep(INTERVAL_SEC)
+            if time.monotonic() + INTERVAL_SEC < end_time:
+                time.sleep(INTERVAL_SEC)
+    except KeyboardInterrupt:
+        print("\n[STOP] Interrupted by user")
 
     if seen_person:
-        print("[DONE] At least one person detected")
+        print(f"[DONE] At least one person detected ({i} samples)")
         sys.exit(0)
-    print("[DONE] No person detected in any sample")
+    print(f"[DONE] No person detected ({i} samples)")
     sys.exit(1)
 
 

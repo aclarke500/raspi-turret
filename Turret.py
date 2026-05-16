@@ -81,6 +81,7 @@ class Turret:
         right_to_left  = np.linspace(270, 0, 30)
         angles = np.concatenate([left_to_right, right_to_left])
         for angle in angles:
+            time.sleep(0.25)
             self.set_x_angle(angle)
             # returns offset [-1, 1] or None if no one is seen
             x_offset_of_target, y_offset_of_target = get_target_direction()

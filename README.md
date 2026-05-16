@@ -28,10 +28,12 @@ And, for good measure:
 pip install -r requirements.txt
 ```
 
-Then, to run:
+Then, to run the turret server (patrol + live view on port 8000):
 ```bash
-python main.py
+bash run.sh
 ```
+
+Open `http://<pi-ip>:8000/` in a browser on the same network for the live stream with detection boxes.
 
 Path for actual project on the raspi:
 /home/aclarke500/Desktop/tflite-prac

@@ -38,13 +38,15 @@ When you reconnect hardware, use **BCM** pin numbers (what the code uses).
 
 | File | Role |
 |------|------|
-| `main.py` | **Production entry point.** Loop: `patrol()` → if target, `snap_to_target()`. SIGINT/SIGTERM → `T.cleanup()`. |
+| `main.py` | **Production entry point.** FastAPI app: auto-starts patrol thread + MJPEG stream. |
+| `run.sh` | Activate venv and run `uvicorn main:app --host 0.0.0.0 --port 8000`. |
+| `utils/stream.py` | `StreamPublisher`: 5 FPS annotated JPEG buffer for `/video`. |
 | `Turret.py` | `Turret` class: PWM pan/tilt, `patrol()`, `snap_to_target()`. **Also runs GPIO init at import time** (see caveats). |
 | `utils/camera.py` | OpenCV `VideoCapture(0)`, background thread, `get_current_frame()`. |
-| `utils/detect.py` | TFLite SSD model, `get_target_direction()` → normalized (x, y) offset or `(None, None)`. |
+| `utils/detect.py` | TFLite SSD: `detect_person()`, `annotate_frame()`, `get_target_direction()` → normalized (x, y). |
 | `utils/utils.py` | `x_offset_to_degrees` / `y_offset_to_degrees` from assumed 55° diagonal FOV, 16:9. |
 | `coco_labels.txt` | COCO class names — copy to `~/tflite_models/` per root README. |
-| `requirements.txt` | numpy, opencv-python-headless, pillow, tflite-runtime. |
+| `requirements.txt` | numpy, opencv-python-headless, pillow, tflite-runtime, fastapi, uvicorn. |
 | `hardware_tests/servo_test.py` | Bench test: GPIO 17 servo 0° / 90° / 180°. |
 | `hardware_tests/camera_test.py` | Bench test: 10 OpenCV frames → `test_photos/frame_01.jpg` … (1280×720, 0.1s apart). |
 | `hardware_tests/ai_test.py` | Bench test: `get_target_direction()` loop up to 5 min (Ctrl+C to stop) — normalized (x, y) from frame center. |
@@ -64,7 +66,8 @@ When you reconnect hardware, use **BCM** pin numbers (what the code uses).
 ```mermaid
 flowchart TB
     subgraph entry["Entry"]
-        main["main.py"]
+        main["main.py FastAPI"]
+        runsh["run.sh uvicorn"]
     end
 
     subgraph turret_mod["Turret.py (import side effects)"]
@@ -73,7 +76,8 @@ flowchart TB
     end
 
     subgraph utils_pkg["utils/"]
-        detect["detect.py\nget_target_direction()"]
+        detect["detect.py\ndetect_person()"]
+        stream["stream.py\nStreamPublisher"]
         camera["camera.py\nget_current_frame()"]
         ut["utils.py\nx_offset_to_degrees()"]
     end
@@ -85,8 +89,12 @@ flowchart TB
         gpio["RPi.GPIO PWM"]
     end
 
+    runsh --> main
     main --> TurretClass
+    main --> stream
     main --> ut
+    stream --> detect
+    stream --> camera
     TurretClass --> detect
     TurretClass --> ut
     TurretClass --> gpio
@@ -155,9 +163,20 @@ sequenceDiagram
 
 ```bash
 cd /home/aclarke500/Desktop/tflite-prac
-source venv/bin/activate   # if you use a venv
-python main.py
+bash run.sh
 ```
+
+Browser (same LAN): `http://<pi-ip>:8000/` — live MJPEG with person boxes and center crosshair.
+
+| Route | Purpose |
+|-------|---------|
+| `GET /` | HTML page with embedded stream |
+| `GET /video` | MJPEG stream (5 FPS, 640×480 annotated) |
+| `GET /api/status` | JSON: turret_running, x_angle, last_detection, stream_fps |
+
+Patrol auto-starts on server startup. Stream and patrol may both run inference (acceptable for v1 debugging on Pi 4).
+
+**Security:** No auth in v1 — LAN only. Do not expose port 8000 to the public internet.
 
 ### Bench hardware before full stack
 

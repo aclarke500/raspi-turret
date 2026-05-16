@@ -47,6 +47,7 @@ When you reconnect hardware, use **BCM** pin numbers (what the code uses).
 | `requirements.txt` | numpy, opencv-python-headless, pillow, tflite-runtime. |
 | `hardware_tests/servo_test.py` | Bench test: GPIO 17 servo 0° / 90° / 180°. |
 | `hardware_tests/camera_test.py` | Bench test: 10 OpenCV frames → `test_photos/frame_01.jpg` … (1280×720, 0.1s apart). |
+| `hardware_tests/ai_test.py` | Bench test: 10× `get_target_direction()` — normalized (x, y) from frame center, [-1, 1]. |
 | `calibrate_y_motor.py` | Bench test: GPIO 27 sweep 0–270°. |
 | `led_test.py` | Blink GPIO 17 — conflicts with X servo on same pin. |
 | `s.py` | Alternative servo test using **pigpio** on GPIO 17. |
@@ -162,7 +163,8 @@ python main.py
 
 ```bash
 python hardware_tests/servo_test.py    # X axis only (GPIO 17)
-python hardware_tests/camera_test.py     # USB webcam snapshot
+python hardware_tests/camera_test.py   # USB webcam burst to test_photos/
+python hardware_tests/ai_test.py       # person detect; prints center-relative x, y
 python calibrate_y_motor.py            # Y axis only (GPIO 27)
 ```
 

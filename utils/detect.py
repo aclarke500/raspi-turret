@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 from pathlib import Path
+import threading
 import time
 
 import cv2
@@ -19,6 +20,7 @@ with open(Path.home() / "tflite_models" / "coco_labels.txt") as f:
     labels = f.read().splitlines()
 
 PERSON_SCORE_THRESHOLD = 0.5
+_inference_lock = threading.Lock()
 
 
 @dataclass
@@ -39,12 +41,12 @@ def detect_person(frame) -> DetectionResult | None:
     img_resized = cv2.resize(frame, (300, 300))
     input_data = np.expand_dims(img_resized.astype(np.uint8), axis=0)
 
-    interpreter.set_tensor(input_details[0]["index"], input_data)
-    interpreter.invoke()
-
-    boxes = interpreter.get_tensor(output_details[0]["index"])[0]
-    classes = interpreter.get_tensor(output_details[1]["index"])[0]
-    scores = interpreter.get_tensor(output_details[2]["index"])[0]
+    with _inference_lock:
+        interpreter.set_tensor(input_details[0]["index"], input_data)
+        interpreter.invoke()
+        boxes = interpreter.get_tensor(output_details[0]["index"])[0].copy()
+        classes = interpreter.get_tensor(output_details[1]["index"])[0].copy()
+        scores = interpreter.get_tensor(output_details[2]["index"])[0].copy()
 
     height, width, _ = frame.shape
     center_x = width / 2

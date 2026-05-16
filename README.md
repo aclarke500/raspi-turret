@@ -32,3 +32,11 @@ Then, to run:
 ```bash
 python main.py
 ```
+
+Path for actual project on the raspi:
+/home/aclarke500/Desktop/tflite-prac
+
+
+Creds to login on RDP:
+aclarke500
+Link500

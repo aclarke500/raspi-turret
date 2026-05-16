@@ -1,14 +1,19 @@
 import sys
+import time
 from pathlib import Path
 
 import cv2
 
 WARMUP_FRAMES = 10
+NUM_PHOTOS = 10
+INTERVAL_SEC = 0.1
 FRAME_SIZE = (1280, 720)
-OUTPUT_PATH = Path(__file__).resolve().parent / "test_camera.jpg"
+OUTPUT_DIR = Path(__file__).resolve().parent / "test_photos"
 
 
 def main():
+    OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
+
     cap = cv2.VideoCapture(0)
     try:
         if not cap.isOpened():
@@ -22,21 +27,31 @@ def main():
                 print("[WARN] Frame capture failed")
                 sys.exit(1)
 
-        ret, frame = cap.read()
-        if not ret:
-            print("[WARN] Frame capture failed")
-            sys.exit(1)
+        print(f"[CAPTURE] Taking {NUM_PHOTOS} photos ({INTERVAL_SEC}s apart)...")
+        saved = []
+        for i in range(1, NUM_PHOTOS + 1):
+            ret, frame = cap.read()
+            if not ret:
+                print("[WARN] Frame capture failed")
+                sys.exit(1)
 
-        resized = cv2.resize(frame, FRAME_SIZE)
-        if not cv2.imwrite(str(OUTPUT_PATH), resized):
-            print(f"[ERROR] Failed to write {OUTPUT_PATH}")
-            sys.exit(1)
+            resized = cv2.resize(frame, FRAME_SIZE)
+            out_path = OUTPUT_DIR / f"frame_{i:02d}.jpg"
+            if not cv2.imwrite(str(out_path), resized):
+                print(f"[ERROR] Failed to write {out_path}")
+                sys.exit(1)
 
-        if not OUTPUT_PATH.is_file() or OUTPUT_PATH.stat().st_size == 0:
-            print(f"[ERROR] Output file missing or empty: {OUTPUT_PATH}")
-            sys.exit(1)
+            if not out_path.is_file() or out_path.stat().st_size == 0:
+                print(f"[ERROR] Output file missing or empty: {out_path}")
+                sys.exit(1)
 
-        print(f"[OK] Saved {OUTPUT_PATH} ({FRAME_SIZE[0]}x{FRAME_SIZE[1]})")
+            saved.append(out_path)
+            print(f"[OK] Saved {out_path}")
+
+            if i < NUM_PHOTOS:
+                time.sleep(INTERVAL_SEC)
+
+        print(f"[DONE] {len(saved)} photos in {OUTPUT_DIR} ({FRAME_SIZE[0]}x{FRAME_SIZE[1]})")
     finally:
         cap.release()
 

@@ -45,7 +45,8 @@ When you reconnect hardware, use **BCM** pin numbers (what the code uses).
 | `utils/utils.py` | `x_offset_to_degrees` / `y_offset_to_degrees` from assumed 55° diagonal FOV, 16:9. |
 | `coco_labels.txt` | COCO class names — copy to `~/tflite_models/` per root README. |
 | `requirements.txt` | numpy, opencv-python-headless, pillow, tflite-runtime. |
-| `servo_test.py` | Bench test: GPIO 17 servo 0° / 90° / 180°. |
+| `hardware_tests/servo_test.py` | Bench test: GPIO 17 servo 0° / 90° / 180°. |
+| `hardware_tests/camera_test.py` | Bench test: 10 OpenCV frames → `test_photos/frame_01.jpg` … (1280×720, 0.1s apart). |
 | `calibrate_y_motor.py` | Bench test: GPIO 27 sweep 0–270°. |
 | `led_test.py` | Blink GPIO 17 — conflicts with X servo on same pin. |
 | `s.py` | Alternative servo test using **pigpio** on GPIO 17. |
@@ -160,8 +161,9 @@ python main.py
 ### Bench hardware before full stack
 
 ```bash
-python servo_test.py           # X axis only (GPIO 17)
-python calibrate_y_motor.py    # Y axis only (GPIO 27)
+python hardware_tests/servo_test.py    # X axis only (GPIO 17)
+python hardware_tests/camera_test.py     # USB webcam snapshot
+python calibrate_y_motor.py            # Y axis only (GPIO 27)
 ```
 
 ---

@@ -4,6 +4,11 @@ from pathlib import Path
 
 import cv2
 
+ROOT = Path(__file__).resolve().parent.parent
+sys.path.insert(0, str(ROOT))
+
+from utils.camera_config import apply_frame_transform
+
 WARMUP_FRAMES = 10
 NUM_PHOTOS = 10
 INTERVAL_SEC = 0.1
@@ -35,7 +40,7 @@ def main():
                 print("[WARN] Frame capture failed")
                 sys.exit(1)
 
-            resized = cv2.resize(frame, FRAME_SIZE)
+            resized = apply_frame_transform(cv2.resize(frame, FRAME_SIZE))
             out_path = OUTPUT_DIR / f"frame_{i:02d}.jpg"
             if not cv2.imwrite(str(out_path), resized):
                 print(f"[ERROR] Failed to write {out_path}")

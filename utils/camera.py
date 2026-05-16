@@ -3,6 +3,8 @@ import threading
 import time
 import atexit
 
+from utils.camera_config import apply_frame_transform
+
 FRAME_SIZE = (1280, 720)
 WARMUP_FRAMES = 10
 MIN_FRAME_MEAN = 5.0  # skip near-black frames until exposure settles
@@ -30,7 +32,7 @@ def update_frame():
     while True:
         ret, frame = cap.read()
         if ret:
-            resized = cv2.resize(frame, FRAME_SIZE)
+            resized = apply_frame_transform(cv2.resize(frame, FRAME_SIZE))
             if resized.mean() < MIN_FRAME_MEAN:
                 time.sleep(0.05)
                 continue

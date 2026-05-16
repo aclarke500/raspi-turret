@@ -109,12 +109,12 @@ class Turret:
             print("Snapping to target iteration", i)
             self.set_x_angle(self.current_x_angle + x_offset_degrees)
             self.set_y_angle(self.current_y_angle + y_offset_degrees)
-            time.sleep(0.1)  # give model time to see new position
+            time.sleep(0.5)  # give model time to see new position
             x_offset_of_target, y_offset_of_target = get_target_direction()
             if x_offset_of_target is None:
                 print("No target found")
                 frames_without_target += 1
-                if frames_without_target > 1:
+                if frames_without_target > 5:
                     break
                 time.sleep(0.5)
                 continue

@@ -75,21 +75,24 @@ class StreamPublisher:
     def _run(self):
         interval = 1.0 / STREAM_FPS
         while not self._stop_event.is_set():
-            frame, capture_ts = get_current_frame_with_capture_time()
-            if frame is not None:
-                result = detect_person(frame)
-                annotated = annotate_frame(frame, result)
-                _draw_stream_timestamps(annotated, capture_ts)
-                resized = cv2.resize(annotated, STREAM_SIZE)
-                ok, encoded = cv2.imencode(
-                    ".jpg",
-                    resized,
-                    [int(cv2.IMWRITE_JPEG_QUALITY), JPEG_QUALITY],
-                )
-                if ok:
-                    jpeg_bytes = encoded.tobytes()
-                    with self._lock:
-                        self._jpeg = jpeg_bytes
-                        self._last_detection = result
+            try:
+                frame, capture_ts = get_current_frame_with_capture_time()
+                if frame is not None:
+                    result = detect_person(frame)
+                    annotated = annotate_frame(frame, result)
+                    _draw_stream_timestamps(annotated, capture_ts)
+                    resized = cv2.resize(annotated, STREAM_SIZE)
+                    ok, encoded = cv2.imencode(
+                        ".jpg",
+                        resized,
+                        [int(cv2.IMWRITE_JPEG_QUALITY), JPEG_QUALITY],
+                    )
+                    if ok:
+                        jpeg_bytes = encoded.tobytes()
+                        with self._lock:
+                            self._jpeg = jpeg_bytes
+                            self._last_detection = result
+            except Exception as e:
+                print(f"[ERROR] StreamPublisher frame failed: {e}")
 
             time.sleep(interval)

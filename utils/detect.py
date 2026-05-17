@@ -17,10 +17,11 @@ input_details = interpreter.get_input_details()
 output_details = interpreter.get_output_details()
 
 with open(Path.home() / "tflite_models" / "coco_labels.txt") as f:
-    labels = f.read().splitlines()
+    labels = [line.strip() for line in f.read().splitlines() if line.strip()]
 
 PERSON_SCORE_THRESHOLD = 0.5
 _inference_lock = threading.Lock()
+_invalid_class_log_time = 0.0
 
 
 @dataclass
@@ -34,26 +35,54 @@ class DetectionResult:
     score: float
 
 
+def _class_to_label(class_id) -> str | None:
+    """Map model class id to label. COCO SSD outputs are usually 1-indexed."""
+    idx = int(class_id)
+    if 1 <= idx <= len(labels):
+        return labels[idx - 1]
+    if 0 <= idx < len(labels):
+        return labels[idx]
+    return None
+
+
 def detect_person(frame) -> DetectionResult | None:
+    global _invalid_class_log_time
+
     if frame is None:
         return None
 
-    img_resized = cv2.resize(frame, (300, 300))
-    input_data = np.expand_dims(img_resized.astype(np.uint8), axis=0)
+    try:
+        img_resized = cv2.resize(frame, (300, 300))
+        input_data = np.expand_dims(img_resized.astype(np.uint8), axis=0)
 
-    with _inference_lock:
-        interpreter.set_tensor(input_details[0]["index"], input_data)
-        interpreter.invoke()
-        boxes = interpreter.get_tensor(output_details[0]["index"])[0].copy()
-        classes = interpreter.get_tensor(output_details[1]["index"])[0].copy()
-        scores = interpreter.get_tensor(output_details[2]["index"])[0].copy()
+        with _inference_lock:
+            interpreter.set_tensor(input_details[0]["index"], input_data)
+            interpreter.invoke()
+            boxes = interpreter.get_tensor(output_details[0]["index"])[0].copy()
+            classes = interpreter.get_tensor(output_details[1]["index"])[0].copy()
+            scores = interpreter.get_tensor(output_details[2]["index"])[0].copy()
 
-    height, width, _ = frame.shape
-    center_x = width / 2
-    center_y = height / 2
+        height, width, _ = frame.shape
+        center_x = width / 2
+        center_y = height / 2
 
-    for i in range(len(scores)):
-        if scores[i] > PERSON_SCORE_THRESHOLD and labels[int(classes[i])] == "person":
+        for i in range(len(scores)):
+            if scores[i] <= PERSON_SCORE_THRESHOLD:
+                continue
+
+            label = _class_to_label(classes[i])
+            if label is None:
+                now = time.monotonic()
+                if now - _invalid_class_log_time >= 5.0:
+                    _invalid_class_log_time = now
+                    print(
+                        f"[WARN] Ignoring detection with invalid class id "
+                        f"{int(classes[i])} (labels file has {len(labels)} entries)"
+                    )
+                continue
+            if label != "person":
+                continue
+
             ymin, xmin, ymax, xmax = boxes[i]
 
             left = int(xmin * width)
@@ -76,7 +105,10 @@ def detect_person(frame) -> DetectionResult | None:
                 score=float(scores[i]),
             )
 
-    return None
+        return None
+    except Exception as e:
+        print(f"[ERROR] detect_person failed: {e}")
+        return None
 
 
 def annotate_frame(frame, result: DetectionResult | None):

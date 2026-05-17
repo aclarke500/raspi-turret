@@ -42,3 +42,6 @@ Path for actual project on the raspi:
 Creds to login on RDP:
 aclarke500
 Link500
+
+192.168.86.51
+ssh aclarke500@192.168.86.51

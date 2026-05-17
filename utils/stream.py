@@ -3,12 +3,40 @@ import time
 
 import cv2
 
-from utils.camera import get_current_frame
+from utils.camera import get_current_frame_with_capture_time
+from utils.camera_config import format_timestamp
 from utils.detect import DetectionResult, annotate_frame, detect_person
 
 STREAM_FPS = 5
 STREAM_SIZE = (640, 480)
 JPEG_QUALITY = 80
+
+
+def _draw_stream_timestamps(frame, capture_ts: str | None):
+    height = frame.shape[0]
+    font = cv2.FONT_HERSHEY_SIMPLEX
+    scale = 0.55
+    thickness = 2
+    color = (255, 255, 255)
+
+    cv2.putText(
+        frame,
+        f"cap {capture_ts or 'n/a'}",
+        (10, height - 44),
+        font,
+        scale,
+        color,
+        thickness,
+    )
+    cv2.putText(
+        frame,
+        f"pub {format_timestamp()}",
+        (10, height - 14),
+        font,
+        scale,
+        color,
+        thickness,
+    )
 
 
 class StreamPublisher:
@@ -47,10 +75,11 @@ class StreamPublisher:
     def _run(self):
         interval = 1.0 / STREAM_FPS
         while not self._stop_event.is_set():
-            frame = get_current_frame()
+            frame, capture_ts = get_current_frame_with_capture_time()
             if frame is not None:
                 result = detect_person(frame)
                 annotated = annotate_frame(frame, result)
+                _draw_stream_timestamps(annotated, capture_ts)
                 resized = cv2.resize(annotated, STREAM_SIZE)
                 ok, encoded = cv2.imencode(
                     ".jpg",

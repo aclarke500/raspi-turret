@@ -1,38 +1,32 @@
-import RPi.GPIO as GPIO
+import sys
 import time
+from pathlib import Path
 
-# Pin config
-SERVO_PIN = 17  # GPIO 17 = Physical pin 11
+ROOT = Path(__file__).resolve().parent.parent
+sys.path.insert(0, str(ROOT))
 
-print("[INIT] Setting up GPIO mode...")
+import RPi.GPIO as GPIO
+
+from utils.servo_config import PAN_MAX_ANGLE, X_SERVO_PIN
+from utils.servo_driver import create_driver
+
 GPIO.setmode(GPIO.BCM)
-GPIO.setup(SERVO_PIN, GPIO.OUT)
+GPIO.setwarnings(False)
 
-print("[INIT] Starting PWM on pin 17 at 50Hz (20ms period)...")
-pwm = GPIO.PWM(SERVO_PIN, 50)  # 50Hz for servo control
-pwm.start(0)  # initial duty cycle
-
-def set_angle(angle):
-    # Convert angle (0–180) to duty cycle
-    duty = (0.05 * angle) + 2.5
-    print(f"[MOVE] Setting angle to {angle}°, which maps to duty cycle {duty:.2f}%")
-    pwm.ChangeDutyCycle(duty)
-    time.sleep(0.5)
-    print("[MOVE] Killing PWM duty to reduce jitter")
-    # pwm.ChangeDutyCycle(0)
+print("[INIT] Pan servo bench test (release-pulse enabled via servo_config)")
+driver = create_driver(X_SERVO_PIN, 0, PAN_MAX_ANGLE)
+driver.start()
 
 try:
-    print("[RUN] Starting servo movement loop...")
+    print("[RUN] Sweep 0° → 90° → 180°...")
     while True:
-        set_angle(0)
-        time.sleep(1)
-        set_angle(90)
-        time.sleep(1)
-        set_angle(180)
-        time.sleep(1)
-
+        for angle in (0, 90, 180):
+            moved = driver.set_angle(angle)
+            print(f"[MOVE] angle={angle}° moved={moved} current={driver.current_angle:.1f}°")
+            time.sleep(1)
 except KeyboardInterrupt:
-    print("[EXIT] CTRL+C received, stopping PWM...")
-    pwm.stop()
+    print("[EXIT] CTRL+C received")
+finally:
+    driver.stop()
     GPIO.cleanup()
-    print("[CLEANUP] GPIO cleaned up.")
+    print("[CLEANUP] Done.")

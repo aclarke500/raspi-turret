@@ -12,7 +12,7 @@ Companion to the root [README.md](../README.md). Use this to remember how the co
 2. While the **X servo** patrols 0° → 270° → 0°, run person detection on each stop.
 3. When a person is seen, **snap_to_target** iteratively pans until the target is near the center of the frame.
 
-**X-only tracking in practice:** Y servo PWM is initialized, but `set_y_angle()` returns immediately (disabled). **No fire/trigger GPIO exists in code yet.**
+**X-only tracking in practice:** Y servo driver is not started (`Y_SERVO_ENABLED = False` in `utils/servo_config.py`). **No fire/trigger GPIO exists in code yet.**
 
 ---
 
@@ -28,7 +28,9 @@ When you reconnect hardware, use **BCM** pin numbers (what the code uses).
 | Servo ground | — | **6, 9, 14, 20, 25, 30, 34, or 39** (GND) | Servo GND + supply GND |
 | USB webcam | — | Any USB port | Should appear as `/dev/video0` |
 
-**PWM settings (from code):** 50 Hz, duty cycle `(0.05 × angle) + 2.5`, angle clamped **0–270°** on X.
+**Servo control:** [`utils/servo_driver.py`](../utils/servo_driver.py) — RPi.GPIO 50 Hz PWM by default, optional **pigpio** (`USE_PIGPIO = True`, run `sudo pigpiod`). After each move: settle, then **release pulse** (`ChangeDutyCycle(0)`) to reduce buzzing. Tune in [`utils/servo_config.py`](../utils/servo_config.py).
+
+**Servo power (reduces jitter):** Use **external 5V** for servos; common GND with Pi. A **100–470 µF** cap across servo power helps. Pi 5V pin alone often causes twitching under load.
 
 **Before powering on:** Do not run `led_test.py` while the X servo is on GPIO 17 — that script uses the same pin as a digital output.
 
@@ -41,13 +43,16 @@ When you reconnect hardware, use **BCM** pin numbers (what the code uses).
 | `main.py` | **Production entry point.** FastAPI app: auto-starts patrol thread + MJPEG stream. |
 | `run.sh` | Activate venv and run `uvicorn main:app --host 0.0.0.0 --port 8000`. |
 | `utils/stream.py` | `StreamPublisher`: 5 FPS annotated JPEG buffer for `/video`. |
-| `Turret.py` | `Turret` class: PWM pan/tilt, `patrol()`, `snap_to_target()`. **Also runs GPIO init at import time** (see caveats). |
+| `Turret.py` | `Turret` class: `patrol()`, closed-loop `snap_to_target()`, uses `servo_driver`. |
+| `utils/servo_config.py` | Jitter tuning: release pulse, min move, max step, deadband, `USE_PIGPIO`. |
+| `utils/servo_driver.py` | `GpioPwmDriver` / `PigpioDriver` — rate-limited `set_angle()`. |
 | `utils/camera.py` | OpenCV `VideoCapture(0)`, background thread, `get_current_frame()`. |
 | `utils/detect.py` | TFLite SSD: `detect_person()`, `annotate_frame()`, `get_target_direction()` → normalized (x, y). |
 | `utils/utils.py` | `x_offset_to_degrees` / `y_offset_to_degrees` from assumed 55° diagonal FOV, 16:9. |
 | `coco_labels.txt` | COCO class names — copy to `~/tflite_models/` per root README. |
 | `requirements.txt` | numpy, opencv-python-headless, pillow, tflite-runtime, fastapi, uvicorn. |
-| `hardware_tests/servo_test.py` | Bench test: GPIO 17 servo 0° / 90° / 180°. |
+| `hardware_tests/servo_test.py` | Bench test: pan sweep 0° / 90° / 180° (uses servo_driver). |
+| `hardware_tests/servo_hold_test.py` | Hold 90° for 10s — check for buzzing at rest. |
 | `hardware_tests/camera_test.py` | Bench test: 10 OpenCV frames → `test_photos/frame_01.jpg` … (1280×720, 0.1s apart). |
 | `hardware_tests/ai_test.py` | Bench test: `get_target_direction()` loop up to 5 min (Ctrl+C to stop) — normalized (x, y) from frame center. |
 | `calibrate_y_motor.py` | Bench test: GPIO 27 sweep 0–270°. |
@@ -181,7 +186,8 @@ Patrol auto-starts on server startup. Stream and patrol may both run inference (
 ### Bench hardware before full stack
 
 ```bash
-python hardware_tests/servo_test.py    # X axis only (GPIO 17)
+python hardware_tests/servo_test.py       # pan sweep with release-pulse
+python hardware_tests/servo_hold_test.py  # hold 90°, listen for buzz
 python hardware_tests/camera_test.py   # USB webcam burst to test_photos/
 python hardware_tests/ai_test.py       # person detect; prints center-relative x, y
 python calibrate_y_motor.py            # Y axis only (GPIO 27)
@@ -213,14 +219,20 @@ Current production path uses `utils/camera.py` + `utils/detect.py` only.
 
 ---
 
+## Tracking / snap loop (current)
+
+1. `patrol()` sweeps pan; on person found returns `(x_norm, y_norm)`.
+2. `snap_to_target()` loops: fresh detection → if `|x_norm| < CENTER_DEADBAND` stop → else pan step `clamp(x_offset_to_degrees(x), ±MAX_MOVE_DEG)`.
+3. `detect_person()` picks **highest-score** person, not first tensor slot.
+
 ## Known quirks / tech debt
 
-1. **GPIO init on import** in `Turret.py` — importing the module configures pins and registers signal handlers; can warn if GPIO is already in use.
-2. **Duplicate signal handlers** — both `Turret.py` and `main.py` register SIGINT/SIGTERM.
-3. **Y axis disabled** — remove the early `return` in `set_y_angle()` to enable tilt tracking.
-4. **`utils/detect.py` imports `RPi.GPIO` unused** (leftover).
-5. **`requirements.txt` omits `RPi.GPIO`** — install on the Pi when setting up the venv.
-6. **Shooting** — described in the project README as a goal; not implemented in GPIO or Python yet.
+1. **Software PWM** — RPi.GPIO can still jitter vs pigpio; set `USE_PIGPIO = True` after `sudo pigpiod` if needed.
+2. **Signal handlers** in `Turret.py` on import.
+3. **Y axis** — set `Y_SERVO_ENABLED = True` in `servo_config.py` when tilt is wired.
+4. **`requirements.txt` omits `RPi.GPIO` / `pigpio`** — install on the Pi when setting up the venv.
+5. **Shooting** — not implemented in GPIO or Python yet.
+6. **Dual inference** — stream + patrol both run TFLite (CPU load).
 
 ---
 

@@ -11,7 +11,7 @@ install_log_capture()
 
 from Turret import Turret
 from utils.stream import StreamPublisher
-from utils.utils import x_offset_to_degrees
+from utils.utils import x_offset_to_degrees, y_offset_to_degrees
 
 turret: Turret | None = None
 stream_publisher: StreamPublisher | None = None
@@ -28,7 +28,7 @@ def run_turret_loop(stop_event: threading.Event, turret_instance: Turret):
             x_offset, y_offset = turret_instance.patrol()
             if x_offset is not None:
                 x_deg = x_offset_to_degrees(x_offset)
-                y_deg = x_offset_to_degrees(y_offset)
+                y_deg = y_offset_to_degrees(y_offset)
                 turret_instance.snap_to_target(x_deg, y_deg)
     finally:
         turret_running = False

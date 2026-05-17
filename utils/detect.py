@@ -66,6 +66,8 @@ def detect_person(frame) -> DetectionResult | None:
         center_x = width / 2
         center_y = height / 2
 
+        best: DetectionResult | None = None
+
         for i in range(len(scores)):
             if scores[i] <= PERSON_SCORE_THRESHOLD:
                 continue
@@ -95,7 +97,7 @@ def detect_person(frame) -> DetectionResult | None:
             x_normalized = vector[0] / (width / 2)
             y_normalized = vector[1] / (height / 2)
 
-            return DetectionResult(
+            candidate = DetectionResult(
                 x_norm=x_normalized,
                 y_norm=y_normalized,
                 left=left,
@@ -104,8 +106,10 @@ def detect_person(frame) -> DetectionResult | None:
                 bottom=bottom,
                 score=float(scores[i]),
             )
+            if best is None or candidate.score > best.score:
+                best = candidate
 
-        return None
+        return best
     except Exception as e:
         print(f"[ERROR] detect_person failed: {e}")
         return None

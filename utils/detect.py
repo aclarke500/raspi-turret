@@ -33,6 +33,16 @@ class DetectionResult:
     right: int
     bottom: int
     score: float
+    frame_width: int
+    frame_height: int
+
+    def crosshair_inside_box(self) -> bool:
+        """True when frame-center crosshair lies inside the person bounding box."""
+        cx = self.frame_width / 2
+        cy = self.frame_height / 2
+        return (
+            self.left <= cx <= self.right and self.top <= cy <= self.bottom
+        )
 
 
 def _class_to_label(class_id) -> str | None:
@@ -105,6 +115,8 @@ def detect_person(frame) -> DetectionResult | None:
                 right=right,
                 bottom=bottom,
                 score=float(scores[i]),
+                frame_width=width,
+                frame_height=height,
             )
             if best is None or candidate.score > best.score:
                 best = candidate
@@ -164,24 +176,36 @@ def annotate_frame(frame, result: DetectionResult | None):
     return annotated
 
 
-def get_target_direction():
+def get_target_detection() -> DetectionResult | None:
     try:
         time.sleep(0.05)
         print("Trying to get frame")
         frame = get_current_frame()
         if frame is None:
-            return None, None
+            return None
 
         result = detect_person(frame)
         if result is None:
-            return None, None
+            return None
 
+        in_box = result.crosshair_inside_box()
         print("found person")
-        print(f"x_normalized: {result.x_norm}, y_normalized: {result.y_norm}  ")
-        return result.x_norm, result.y_norm
+        print(
+            f"x_normalized: {result.x_norm}, y_normalized: {result.y_norm}  "
+            f"box=({result.left},{result.top})-({result.right},{result.bottom}) "
+            f"crosshair_in_box={in_box}"
+        )
+        return result
     except Exception as e:
-        print(f"[ERROR] get_target_direction failed: {e}")
+        print(f"[ERROR] get_target_detection failed: {e}")
+        return None
+
+
+def get_target_direction():
+    result = get_target_detection()
+    if result is None:
         return None, None
+    return result.x_norm, result.y_norm
 
 
 def is_in_safezone(x):

@@ -5,9 +5,8 @@ import time
 import numpy as np
 import RPi.GPIO as GPIO
 
-from utils.detect import get_target_direction
+from utils.detect import get_target_detection, get_target_direction
 from utils.servo_config import (
-    CENTER_DEADBAND,
     CREEP_LOOP_SLEEP_SEC,
     CREEP_MAX_STEP_DEG,
     CREEP_MIN_INTERVAL_SEC,
@@ -151,9 +150,9 @@ class Turret:
 
         for i in range(max_attempts):
             time.sleep(CREEP_LOOP_SLEEP_SEC)
-            x_offset_of_target, y_offset_of_target = get_target_direction()
+            detection = get_target_detection()
 
-            if x_offset_of_target is None:
+            if detection is None:
                 print(f"[TARGET] No target (creep {i})")
                 frames_without_target += 1
                 if frames_without_target > 5:
@@ -161,10 +160,13 @@ class Turret:
                 continue
 
             frames_without_target = 0
+            x_offset_of_target = detection.x_norm
+            y_offset_of_target = detection.y_norm
 
-            if abs(x_offset_of_target) < CENTER_DEADBAND:
+            if detection.crosshair_inside_box():
                 print(
-                    f"[TARGET] Target acquired! X offset: {x_offset_of_target:.2f}, "
+                    f"[TARGET] Target acquired! crosshair inside box "
+                    f"({detection.left},{detection.top})-({detection.right},{detection.bottom}), "
                     f"angle: {self.current_x_angle:.1f}°"
                 )
                 break

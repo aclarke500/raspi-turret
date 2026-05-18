@@ -222,7 +222,7 @@ Current production path uses `utils/camera.py` + `utils/detect.py` only.
 ## Tracking / creep loop (current)
 
 1. `patrol()` sweeps pan; on person found returns `(x_norm, y_norm)`.
-2. `snap_to_target()` loops: fresh detection → if `|x_norm| < CENTER_DEADBAND` stop → else creep pan step via `creep_step_degrees()` (2–3° toward target, at most once per `CREEP_MIN_INTERVAL_SEC`).
+2. `snap_to_target()` loops: fresh detection → if crosshair (frame center) is inside the person bounding box stop → else creep pan step via `creep_step_degrees()` (2–3° toward box center, at most once per `CREEP_MIN_INTERVAL_SEC`).
 3. `detect_person()` picks **highest-score** person, not first tensor slot.
 
 ## Known quirks / tech debt

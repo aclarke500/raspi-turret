@@ -5,7 +5,7 @@ import time
 import numpy as np
 import RPi.GPIO as GPIO
 
-from utils.detect import get_target_detection, get_target_direction
+from utils.detect import get_target_detection, log_tracking_debug
 from utils.servo_config import (
     CREEP_LOOP_SLEEP_SEC,
     CREEP_MAX_STEP_DEG,
@@ -20,7 +20,7 @@ from utils.servo_config import (
     Y_SERVO_PIN,
 )
 from utils.servo_driver import create_driver
-from utils.utils import creep_step_degrees, x_offset_to_degrees, y_offset_to_degrees
+from utils.utils import creep_step_degrees, y_offset_to_degrees
 
 _pan_driver = None
 _tilt_driver = None
@@ -123,16 +123,14 @@ class Turret:
         for angle in angles:
             time.sleep(0.25)
             self.set_x_angle(angle)
-            x_offset_of_target, y_offset_of_target = get_target_direction()
-            if x_offset_of_target is not None:
-                degrees_offset = x_offset_to_degrees(x_offset_of_target)
-                target_angle = self.current_x_angle + degrees_offset
-                print(
-                    f"[TARGET] Found target! X offset: {x_offset_of_target:.2f}, "
-                    f"Degrees offset: {degrees_offset:.1f}°, Current angle: {self.current_x_angle:.1f}°, "
-                    f"Target angle: {target_angle:.1f}°"
+            detection = get_target_detection()
+            if detection is not None:
+                log_tracking_debug(
+                    detection,
+                    decision="PATROL_FOUND",
+                    pan_angle=self.current_x_angle,
                 )
-                return x_offset_of_target, y_offset_of_target
+                return detection.x_norm, detection.y_norm
         return None, None
 
     def traverse(self):
@@ -153,7 +151,11 @@ class Turret:
             detection = get_target_detection()
 
             if detection is None:
-                print(f"[TARGET] No target (creep {i})")
+                log_tracking_debug(
+                    None,
+                    decision="NO_PERSON",
+                    detail=f"creep_iter={i} misses={frames_without_target + 1}",
+                )
                 frames_without_target += 1
                 if frames_without_target > 5:
                     break
@@ -164,24 +166,43 @@ class Turret:
             y_offset_of_target = detection.y_norm
 
             if detection.crosshair_inside_box():
-                print(
-                    f"[TARGET] Target acquired! crosshair inside box "
-                    f"({detection.left},{detection.top})-({detection.right},{detection.bottom}), "
-                    f"angle: {self.current_x_angle:.1f}°"
+                log_tracking_debug(
+                    detection,
+                    decision="HOLD",
+                    pan_angle=self.current_x_angle,
+                    detail="crosshair_inside_box",
                 )
                 break
 
             now = time.monotonic()
-            if now - last_move_time < CREEP_MIN_INTERVAL_SEC:
+            elapsed = now - last_move_time
+            if elapsed < CREEP_MIN_INTERVAL_SEC:
+                wait_left = CREEP_MIN_INTERVAL_SEC - elapsed
+                log_tracking_debug(
+                    detection,
+                    decision="WAIT_INTERVAL",
+                    pan_angle=self.current_x_angle,
+                    detail=f"{wait_left:.1f}s_until_move",
+                )
                 continue
 
             step_x = creep_step_degrees(
                 x_offset_of_target, CREEP_MAX_STEP_DEG, CREEP_MIN_STEP_DEG
             )
-            if abs(step_x) >= 0.1:
-                print(
-                    f"[TARGET] Creep: step {step_x:+.1f}° "
-                    f"(x_norm={x_offset_of_target:+.2f})"
+            if abs(step_x) < 0.1:
+                log_tracking_debug(
+                    detection,
+                    decision="NO_STEP",
+                    step_deg=step_x,
+                    pan_angle=self.current_x_angle,
+                )
+            else:
+                decision = "PAN_RIGHT" if step_x > 0 else "PAN_LEFT"
+                log_tracking_debug(
+                    detection,
+                    decision=decision,
+                    step_deg=step_x,
+                    pan_angle=self.current_x_angle,
                 )
                 self.set_x_angle(self.current_x_angle + step_x)
                 last_move_time = now

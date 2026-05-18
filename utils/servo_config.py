@@ -21,10 +21,7 @@ MIN_MOVE_DEG = 2.0
 MAX_MOVE_DEG = 8.0
 MIN_MOVE_INTERVAL_SEC = 0.15
 
-# Tracking: normalized offset from frame center below this → considered centered
-CENTER_DEADBAND = 0.05
-
-# Creep tracking: small discrete steps when target is outside deadband
+# Creep tracking: small discrete steps when crosshair is outside person box
 CREEP_MIN_INTERVAL_SEC = 1.0
 CREEP_MAX_STEP_DEG = 3.0
 CREEP_MIN_STEP_DEG = 2.0

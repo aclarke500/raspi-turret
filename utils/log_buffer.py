@@ -18,7 +18,7 @@ def _infer_level(line: str) -> str:
         return "error"
     if "[WARN]" in line:
         return "warn"
-    if "[TARGET]" in line or "found person" in line:
+    if "[TARGET]" in line or "[TRACK]" in line or "found person" in line:
         return "target"
     if "[INIT]" in line or "[OK]" in line or "INFO:" in line:
         return "info"

@@ -38,11 +38,73 @@ class DetectionResult:
 
     def crosshair_inside_box(self) -> bool:
         """True when frame-center crosshair lies inside the person bounding box."""
-        cx = self.frame_width / 2
-        cy = self.frame_height / 2
-        return (
-            self.left <= cx <= self.right and self.top <= cy <= self.bottom
-        )
+        cx, cy = self.crosshair_xy
+        return self.left <= cx <= self.right and self.top <= cy <= self.bottom
+
+    @property
+    def crosshair_xy(self) -> tuple[float, float]:
+        return (self.frame_width / 2, self.frame_height / 2)
+
+    @property
+    def centroid_xy(self) -> tuple[float, float]:
+        return ((self.left + self.right) / 2, (self.top + self.bottom) / 2)
+
+    @property
+    def corners(self) -> dict[str, tuple[int, int]]:
+        return {
+            "top_left": (self.left, self.top),
+            "top_right": (self.right, self.top),
+            "bottom_left": (self.left, self.bottom),
+            "bottom_right": (self.right, self.bottom),
+        }
+
+    def person_horizontal_hint(self) -> str:
+        cx, _ = self.crosshair_xy
+        px, _ = self.centroid_xy
+        if px > cx:
+            return "person_right_of_crosshair"
+        if px < cx:
+            return "person_left_of_crosshair"
+        return "person_aligned_horizontally"
+
+
+def log_tracking_debug(
+    result: DetectionResult | None,
+    *,
+    decision: str,
+    step_deg: float | None = None,
+    pan_angle: float | None = None,
+    detail: str = "",
+) -> None:
+    if result is None:
+        parts = [f"[TRACK] decision={decision}"]
+        if detail:
+            parts.append(f"detail={detail}")
+        print(" ".join(parts))
+        return
+
+    ch_x, ch_y = result.crosshair_xy
+    cen_x, cen_y = result.centroid_xy
+    c = result.corners
+    in_box = result.crosshair_inside_box()
+    step_s = "None" if step_deg is None else f"{step_deg:+.1f}"
+    pan_s = "None" if pan_angle is None else f"{pan_angle:.1f}"
+
+    parts = [
+        f"[TRACK] decision={decision}",
+        f"crosshair=({ch_x:.0f},{ch_y:.0f})",
+        f"centroid=({cen_x:.0f},{cen_y:.0f})",
+        f"in_box={in_box}",
+        f"corners=TL{c['top_left']} TR{c['top_right']} BL{c['bottom_left']} BR{c['bottom_right']}",
+        f"x_norm={result.x_norm:+.2f} y_norm={result.y_norm:+.2f}",
+        f"score={result.score:.2f}",
+        result.person_horizontal_hint(),
+        f"step_deg={step_s}",
+        f"pan={pan_s}°",
+    ]
+    if detail:
+        parts.append(f"detail={detail}")
+    print(" ".join(parts))
 
 
 def _class_to_label(class_id) -> str | None:
@@ -160,9 +222,11 @@ def annotate_frame(frame, result: DetectionResult | None):
         (0, 255, 0),
         2,
     )
+    in_box = result.crosshair_inside_box()
     label = (
         f"person {result.score:.2f}  "
-        f"x={result.x_norm:+.2f} y={result.y_norm:+.2f}"
+        f"x={result.x_norm:+.2f} y={result.y_norm:+.2f}  "
+        f"{'ON_TARGET' if in_box else 'CREEP'}"
     )
     cv2.putText(
         annotated,
@@ -179,23 +243,10 @@ def annotate_frame(frame, result: DetectionResult | None):
 def get_target_detection() -> DetectionResult | None:
     try:
         time.sleep(0.05)
-        print("Trying to get frame")
         frame = get_current_frame()
         if frame is None:
             return None
-
-        result = detect_person(frame)
-        if result is None:
-            return None
-
-        in_box = result.crosshair_inside_box()
-        print("found person")
-        print(
-            f"x_normalized: {result.x_norm}, y_normalized: {result.y_norm}  "
-            f"box=({result.left},{result.top})-({result.right},{result.bottom}) "
-            f"crosshair_in_box={in_box}"
-        )
-        return result
+        return detect_person(frame)
     except Exception as e:
         print(f"[ERROR] get_target_detection failed: {e}")
         return None

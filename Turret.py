@@ -13,6 +13,8 @@ from utils.servo_config import (
     CREEP_MIN_STEP_DEG,
     PAN_MAX_ANGLE,
     PAN_MIN_ANGLE,
+    TRACK_LOST_FRAMES,
+    TRACK_LOST_HOLD_SEC,
     X_SERVO_PIN,
     Y_MAX_ANGLE,
     Y_MIN_ANGLE,
@@ -114,13 +116,20 @@ class Turret:
             return False
         return self._tilt.set_angle(angle)
 
-    def patrol(self):
-        self.set_x_angle(0)
-        self.set_y_angle(0)
+    def patrol(self, reset_home: bool = False):
+        if reset_home:
+            self.set_x_angle(0)
+            self.set_y_angle(0)
+
         left_to_right = np.linspace(PAN_MIN_ANGLE, PAN_MAX_ANGLE, 30)
         right_to_left = np.linspace(PAN_MAX_ANGLE, PAN_MIN_ANGLE, 30)
         angles = np.concatenate([left_to_right, right_to_left])
-        for angle in angles:
+
+        current = self.current_x_angle
+        start_idx = int(np.argmin(np.abs(angles - current)))
+        sweep_angles = np.concatenate([angles[start_idx:], angles[:start_idx]])
+
+        for angle in sweep_angles:
             time.sleep(0.25)
             self.set_x_angle(angle)
             detection = get_target_detection()
@@ -133,18 +142,24 @@ class Turret:
                 return detection.x_norm, detection.y_norm
         return None, None
 
+    def hold_last_angle(self):
+        print(
+            f"[TARGET] Target lost — holding pan at {self.current_x_angle:.1f}° "
+            f"for {TRACK_LOST_HOLD_SEC:.1f}s"
+        )
+        time.sleep(TRACK_LOST_HOLD_SEC)
+
     def traverse(self):
         angles = [0, 30, 60, 90, 120, 150, 200, 270]
         for angle in angles:
             self.set_x_angle(angle)
             self.set_y_angle(angle)
 
-    def snap_to_target(self, x_offset_degrees, y_offset_degrees):
-        max_attempts = 100
+    def follow_target(self):
+        max_attempts = 10000
         frames_without_target = 0
         last_move_time = 0.0
-        x_offset_of_target = None
-        y_offset_of_target = None
+        exit_reason = "max_attempts"
 
         for i in range(max_attempts):
             time.sleep(CREEP_LOOP_SLEEP_SEC)
@@ -154,16 +169,15 @@ class Turret:
                 log_tracking_debug(
                     None,
                     decision="NO_PERSON",
-                    detail=f"creep_iter={i} misses={frames_without_target + 1}",
+                    detail=f"follow_iter={i} misses={frames_without_target + 1}",
                 )
                 frames_without_target += 1
-                if frames_without_target > 5:
+                if frames_without_target >= TRACK_LOST_FRAMES:
+                    exit_reason = "lost"
                     break
                 continue
 
             frames_without_target = 0
-            x_offset_of_target = detection.x_norm
-            y_offset_of_target = detection.y_norm
 
             if detection.crosshair_inside_box():
                 log_tracking_debug(
@@ -172,7 +186,7 @@ class Turret:
                     pan_angle=self.current_x_angle,
                     detail="crosshair_inside_box",
                 )
-                break
+                continue
 
             now = time.monotonic()
             elapsed = now - last_move_time
@@ -187,7 +201,7 @@ class Turret:
                 continue
 
             step_x = creep_step_degrees(
-                x_offset_of_target, CREEP_MAX_STEP_DEG, CREEP_MIN_STEP_DEG
+                detection.x_norm, CREEP_MAX_STEP_DEG, CREEP_MIN_STEP_DEG
             )
             if abs(step_x) < 0.1:
                 log_tracking_debug(
@@ -207,9 +221,9 @@ class Turret:
                 self.set_x_angle(self.current_x_angle + step_x)
                 last_move_time = now
 
-            if self._tilt is not None and y_offset_of_target is not None:
+            if self._tilt is not None:
                 step_y = creep_step_degrees(
-                    y_offset_of_target,
+                    detection.y_norm,
                     CREEP_MAX_STEP_DEG,
                     CREEP_MIN_STEP_DEG,
                     y_offset_to_degrees,
@@ -217,4 +231,5 @@ class Turret:
                 if abs(step_y) >= 0.1:
                     self.set_y_angle(self.current_y_angle + step_y)
 
-        return x_offset_of_target, y_offset_of_target
+        print(f"[TARGET] Follow ended: {exit_reason}")
+        return exit_reason

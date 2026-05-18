@@ -9,8 +9,9 @@ Companion to the root [README.md](../README.md). Use this to remember how the co
 ## What this does (today)
 
 1. Capture video from a **USB webcam** (1280×720) in a background thread.
-2. While the **X servo** patrols 0° → 270° → 0°, run person detection on each stop.
-3. When a person is seen, **snap_to_target** iteratively pans until the target is near the center of the frame.
+2. While the **X servo** patrols (from current angle, no reset to 0° on re-acquire), run person detection on each stop.
+3. When a person is seen, **follow_target** keeps tracking until lost; creeps when crosshair is outside the person box, holds when inside.
+4. After **TRACK_LOST_FRAMES** consecutive misses, hold last angle briefly then resume patrol.
 
 **X-only tracking in practice:** Y servo driver is not started (`Y_SERVO_ENABLED = False` in `utils/servo_config.py`). **No fire/trigger GPIO exists in code yet.**
 
@@ -43,7 +44,7 @@ When you reconnect hardware, use **BCM** pin numbers (what the code uses).
 | `main.py` | **Production entry point.** FastAPI app: auto-starts patrol thread + MJPEG stream. |
 | `run.sh` | Activate venv and run `uvicorn main:app --host 0.0.0.0 --port 8000`. |
 | `utils/stream.py` | `StreamPublisher`: 5 FPS annotated JPEG buffer for `/video`. |
-| `Turret.py` | `Turret` class: `patrol()`, closed-loop `snap_to_target()`, uses `servo_driver`. |
+| `Turret.py` | `Turret` class: `patrol()`, `follow_target()`, `hold_last_angle()`, uses `servo_driver`. |
 | `utils/servo_config.py` | Jitter tuning: release pulse, min move, max step, deadband, `USE_PIGPIO`. |
 | `utils/servo_driver.py` | `GpioPwmDriver` / `PigpioDriver` — rate-limited `set_angle()`. |
 | `utils/camera.py` | OpenCV `VideoCapture(0)`, background thread, `get_current_frame()`. |
@@ -142,13 +143,12 @@ sequenceDiagram
         end
 
         alt target seen
-            main->>main: x_offset_to_degrees()
-            main->>T: snap_to_target(deg_x, deg_y)
-            loop up to 100 iterations
-                T->>T: set_x_angle(current + offset)
-                Note over T: set_y_angle() no-op (disabled)
-                T->>Det: get_target_direction()
+            main->>T: follow_target()
+            loop until lost
+                T->>T: creep or hold pan
+                T->>Det: get_target_detection()
             end
+            main->>T: hold_last_angle()
         end
     end
 
@@ -219,11 +219,12 @@ Current production path uses `utils/camera.py` + `utils/detect.py` only.
 
 ---
 
-## Tracking / creep loop (current)
+## Tracking / follow loop (current)
 
-1. `patrol()` sweeps pan; on person found returns `(x_norm, y_norm)`.
-2. `snap_to_target()` loops: fresh detection → if crosshair (frame center) is inside the person bounding box stop → else creep pan step via `creep_step_degrees()` (2–3° toward box center, at most once per `CREEP_MIN_INTERVAL_SEC`).
-3. `detect_person()` picks **highest-score** person, not first tensor slot.
+1. `patrol(reset_home=False)` sweeps pan from **current angle** (only `setup()` homes to 0°); on person found returns offsets.
+2. `follow_target()` runs until `TRACK_LOST_FRAMES` consecutive `NO_PERSON` frames — does **not** exit on `HOLD`; creeps when crosshair is outside the person box.
+3. `hold_last_angle()` pauses `TRACK_LOST_HOLD_SEC` at last pan, then patrol resumes.
+4. `detect_person()` picks **highest-score** person, not first tensor slot. Out-of-range class ids (e.g. 81) are ignored with a warning.
 
 ## Known quirks / tech debt
 

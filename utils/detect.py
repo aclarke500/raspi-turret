@@ -150,8 +150,9 @@ def detect_person(frame) -> DetectionResult | None:
                 if now - _invalid_class_log_time >= 5.0:
                     _invalid_class_log_time = now
                     print(
-                        f"[WARN] Ignoring detection with invalid class id "
-                        f"{int(classes[i])} (labels file has {len(labels)} entries)"
+                        f"[WARN] Ignoring detection class id {int(classes[i])} "
+                        f"(out of range for {len(labels)} COCO labels; not an error). "
+                        f"Valid person id is 1."
                     )
                 continue
             if label != "person":

@@ -24,6 +24,12 @@ MIN_MOVE_INTERVAL_SEC = 0.15
 # Tracking: normalized offset from frame center below this → considered centered
 CENTER_DEADBAND = 0.05
 
+# Creep tracking: small discrete steps when target is outside deadband
+CREEP_MIN_INTERVAL_SEC = 1.0
+CREEP_MAX_STEP_DEG = 3.0
+CREEP_MIN_STEP_DEG = 2.0
+CREEP_LOOP_SLEEP_SEC = 0.2
+
 # pigpio pulse range for 0–270° (matches s.py bench script)
 PIGPIO_PULSE_MIN_US = 500
 PIGPIO_PULSE_MAX_US = 2500

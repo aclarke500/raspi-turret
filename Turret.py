@@ -8,7 +8,10 @@ import RPi.GPIO as GPIO
 from utils.detect import get_target_direction
 from utils.servo_config import (
     CENTER_DEADBAND,
-    MAX_MOVE_DEG,
+    CREEP_LOOP_SLEEP_SEC,
+    CREEP_MAX_STEP_DEG,
+    CREEP_MIN_INTERVAL_SEC,
+    CREEP_MIN_STEP_DEG,
     PAN_MAX_ANGLE,
     PAN_MIN_ANGLE,
     X_SERVO_PIN,
@@ -18,7 +21,7 @@ from utils.servo_config import (
     Y_SERVO_PIN,
 )
 from utils.servo_driver import create_driver
-from utils.utils import x_offset_to_degrees, y_offset_to_degrees
+from utils.utils import creep_step_degrees, x_offset_to_degrees, y_offset_to_degrees
 
 _pan_driver = None
 _tilt_driver = None
@@ -142,15 +145,16 @@ class Turret:
     def snap_to_target(self, x_offset_degrees, y_offset_degrees):
         max_attempts = 100
         frames_without_target = 0
+        last_move_time = 0.0
         x_offset_of_target = None
         y_offset_of_target = None
 
         for i in range(max_attempts):
-            time.sleep(0.3)
+            time.sleep(CREEP_LOOP_SLEEP_SEC)
             x_offset_of_target, y_offset_of_target = get_target_direction()
 
             if x_offset_of_target is None:
-                print(f"[TARGET] No target (snap {i})")
+                print(f"[TARGET] No target (creep {i})")
                 frames_without_target += 1
                 if frames_without_target > 5:
                     break
@@ -165,15 +169,28 @@ class Turret:
                 )
                 break
 
-            step_x = x_offset_to_degrees(x_offset_of_target)
-            step_x = max(-MAX_MOVE_DEG, min(MAX_MOVE_DEG, step_x))
+            now = time.monotonic()
+            if now - last_move_time < CREEP_MIN_INTERVAL_SEC:
+                continue
+
+            step_x = creep_step_degrees(
+                x_offset_of_target, CREEP_MAX_STEP_DEG, CREEP_MIN_STEP_DEG
+            )
             if abs(step_x) >= 0.1:
-                print(f"[TARGET] Snap {i}: step {step_x:+.1f}° (x_norm={x_offset_of_target:+.2f})")
+                print(
+                    f"[TARGET] Creep: step {step_x:+.1f}° "
+                    f"(x_norm={x_offset_of_target:+.2f})"
+                )
                 self.set_x_angle(self.current_x_angle + step_x)
+                last_move_time = now
 
             if self._tilt is not None and y_offset_of_target is not None:
-                step_y = y_offset_to_degrees(y_offset_of_target)
-                step_y = max(-MAX_MOVE_DEG, min(MAX_MOVE_DEG, step_y))
+                step_y = creep_step_degrees(
+                    y_offset_of_target,
+                    CREEP_MAX_STEP_DEG,
+                    CREEP_MIN_STEP_DEG,
+                    y_offset_to_degrees,
+                )
                 if abs(step_y) >= 0.1:
                     self.set_y_angle(self.current_y_angle + step_y)
 

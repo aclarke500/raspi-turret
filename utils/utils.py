@@ -17,3 +17,15 @@ def x_offset_to_degrees(x_offset):
 
 def y_offset_to_degrees(y_offset):
     return -1*y_offset*vfov/2
+
+
+def creep_step_degrees(
+    offset_norm: float, max_step: float, min_step: float, to_degrees=x_offset_to_degrees
+) -> float:
+    full = to_degrees(offset_norm)
+    if abs(full) < 0.01:
+        return 0.0
+    step = math.copysign(min(abs(full), max_step), full)
+    if abs(step) < min_step:
+        step = math.copysign(min_step, full)
+    return step

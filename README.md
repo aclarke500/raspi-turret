@@ -28,6 +28,11 @@ And, for good measure:
 pip install -r requirements.txt
 ```
 
+Pi CSI camera bench test (on the Pi, after `sudo apt install -y python3-picamera2`):
+```bash
+python hardware_tests/picam_test.py
+```
+
 Then, to run the turret server (patrol + live view on port 8000):
 ```bash
 bash run.sh

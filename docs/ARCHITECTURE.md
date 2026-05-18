@@ -55,6 +55,7 @@ When you reconnect hardware, use **BCM** pin numbers (what the code uses).
 | `hardware_tests/servo_test.py` | Bench test: pan sweep 0° / 90° / 180° (uses servo_driver). |
 | `hardware_tests/servo_hold_test.py` | Hold 90° for 10s — check for buzzing at rest. |
 | `hardware_tests/camera_test.py` | Bench test: 10 OpenCV frames → `test_photos/frame_01.jpg` … (1280×720, 0.1s apart). |
+| `hardware_tests/picam_test.py` | Pi-only: picamera2 detect CSI camera → one frame → `picam_photos/picam_test.jpg`. |
 | `hardware_tests/ai_test.py` | Bench test: `get_target_direction()` loop up to 5 min (Ctrl+C to stop) — normalized (x, y) from frame center. |
 | `calibrate_y_motor.py` | Bench test: GPIO 27 sweep 0–270°. |
 | `led_test.py` | Blink GPIO 17 — conflicts with X servo on same pin. |
@@ -189,6 +190,7 @@ Patrol auto-starts on server startup. Stream and patrol may both run inference (
 python hardware_tests/servo_test.py       # pan sweep with release-pulse
 python hardware_tests/servo_hold_test.py  # hold 90°, listen for buzz
 python hardware_tests/camera_test.py   # USB webcam burst to test_photos/
+python hardware_tests/picam_test.py    # Pi CSI camera → picam_photos/picam_test.jpg
 python hardware_tests/ai_test.py       # person detect; prints center-relative x, y
 python calibrate_y_motor.py            # Y axis only (GPIO 27)
 ```

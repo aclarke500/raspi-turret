@@ -14,7 +14,7 @@ GPIO.setmode(GPIO.BCM)
 GPIO.setwarnings(False)
 
 print("[INIT] Pan servo bench test (release-pulse enabled via servo_config)")
-driver = create_driver(X_SERVO_PIN, 0, PAN_MAX_ANGLE)
+driver = create_driver(Y_SERVO_PIN, 0, PAN_MAX_ANGLE)
 driver.start()
 
 try:

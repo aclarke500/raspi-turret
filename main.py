@@ -18,6 +18,7 @@ from utils.stream import StreamPublisher
 class NudgeRequest(BaseModel):
     direction: str = Field(..., pattern="^(?i)(left|right|up|down)$")
 
+
 turret: Turret | None = None
 stream_publisher: StreamPublisher | None = None
 turret_stop_event = threading.Event()
@@ -197,7 +198,29 @@ INDEX_HTML = """
   <h1>raspi-turret</h1>
   <p class="sub">LAN only — live stream + captured logs</p>
   <div class="layout">
-    <motion.div class="video-col">
+    <div class="video-col">
+      <div class="panel video-wrap">
+        <h2>Live video</h2>
+        <img src="/video" alt="live stream">
+      </div>
+      <div class="panel dpad-wrap">
+        <h3>Manual control (10° per click)</h3>
+        <div class="dpad">
+          <span class="spacer"></span>
+          <button type="button" id="btn-up" title="Tilt up 10°">▲</button>
+          <span class="spacer"></span>
+          <button type="button" id="btn-left" title="Pan left 10°">◀</button>
+          <span class="spacer"></span>
+          <button type="button" id="btn-right" title="Pan right 10°">▶</button>
+          <span class="spacer"></span>
+          <button type="button" id="btn-down" title="Tilt down 10°">▼</button>
+          <span class="spacer"></span>
+        </div>
+        <p class="dpad-status" id="dpad-status">—</p>
+      </div>
+    </div>
+    <div class="panel log-wrap">
+      <h2>Logs</h2>
       <div class="log-table-wrap">
         <table class="log-table">
           <thead>
@@ -258,6 +281,65 @@ INDEX_HTML = """
 
     setInterval(pollLogs, 500);
     pollLogs();
+
+    const dpadStatus = document.getElementById('dpad-status');
+    const btnUp = document.getElementById('btn-up');
+    const btnDown = document.getElementById('btn-down');
+    let nudgeBusy = false;
+
+    function formatAngles(x, y) {
+      const parts = [];
+      if (x != null) parts.push('Pan ' + Math.round(x) + '°');
+      if (y != null) parts.push('Tilt ' + Math.round(y) + '°');
+      return parts.length ? parts.join(' · ') : '—';
+    }
+
+    function errorMessage(data, fallback) {
+      const d = data && data.detail;
+      if (typeof d === 'string') return d;
+      if (Array.isArray(d)) return d.map((x) => x.msg || String(x)).join('; ');
+      return fallback;
+    }
+
+    async function doNudge(direction) {
+      if (nudgeBusy) return;
+      nudgeBusy = true;
+      dpadStatus.classList.remove('err');
+      try {
+        const res = await fetch('/api/nudge', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ direction }),
+        });
+        const data = await res.json();
+        if (!res.ok) {
+          throw new Error(errorMessage(data, res.statusText));
+        }
+        dpadStatus.textContent = formatAngles(data.x_angle, data.y_angle);
+      } catch (err) {
+        dpadStatus.textContent = err.message || String(err);
+        dpadStatus.classList.add('err');
+      } finally {
+        nudgeBusy = false;
+      }
+    }
+
+    document.getElementById('btn-up').addEventListener('click', () => doNudge('up'));
+    document.getElementById('btn-down').addEventListener('click', () => doNudge('down'));
+    document.getElementById('btn-left').addEventListener('click', () => doNudge('left'));
+    document.getElementById('btn-right').addEventListener('click', () => doNudge('right'));
+
+    async function pollStatus() {
+      try {
+        const res = await fetch('/api/status');
+        const data = await res.json();
+        const tiltOk = data.y_angle != null;
+        btnUp.disabled = !tiltOk;
+        btnDown.disabled = !tiltOk;
+      } catch (_) { /* ignore */ }
+    }
+    pollStatus();
+    setInterval(pollStatus, 3000);
   </script>
 </body>
 </html>
@@ -313,6 +395,28 @@ async def status():
     return {
         "turret_running": turret_running,
         "x_angle": turret.current_x_angle if turret is not None else None,
+        "y_angle": (
+            turret.current_y_angle
+            if turret is not None and Y_SERVO_ENABLED
+            else None
+        ),
         "stream_fps": stream_publisher.fps if stream_publisher is not None else None,
         "last_detection": detection,
     }
+
+
+@app.post("/api/nudge")
+async def nudge_api(body: NudgeRequest):
+    if turret is None:
+        raise HTTPException(status_code=400, detail="Turret not initialized")
+
+    direction = body.direction.lower()
+    if direction in ("up", "down") and not Y_SERVO_ENABLED:
+        raise HTTPException(status_code=503, detail="Tilt servo disabled")
+
+    try:
+        return turret.nudge(direction)
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+    except RuntimeError as exc:
+        raise HTTPException(status_code=503, detail=str(exc)) from exc

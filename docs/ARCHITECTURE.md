@@ -178,7 +178,8 @@ Browser (same LAN): `http://<pi-ip>:8000/` — live MJPEG with person boxes and 
 |-------|---------|
 | `GET /` | HTML page with embedded stream |
 | `GET /video` | MJPEG stream (5 FPS, 640×480 annotated) |
-| `GET /api/status` | JSON: turret_running, x_angle, last_detection, stream_fps |
+| `GET /api/status` | JSON: turret_running, x_angle, y_angle, last_detection, stream_fps |
+| `POST /api/nudge` | JSON body `{ "direction": "up"|"down"|"left"|"right" }` — manual 10° pan/tilt bump |
 
 Patrol auto-starts on server startup. Stream and patrol may both run inference (acceptable for v1 debugging on Pi 4).
 

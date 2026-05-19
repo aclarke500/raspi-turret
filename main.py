@@ -2,15 +2,21 @@ import asyncio
 import threading
 from contextlib import asynccontextmanager
 
-from fastapi import FastAPI, Query
+from fastapi import FastAPI, HTTPException, Query
 from fastapi.responses import HTMLResponse, StreamingResponse
+from pydantic import BaseModel, Field
 
 from utils.log_buffer import get_logs, install_log_capture
 
 install_log_capture()
 
 from Turret import Turret
+from utils.servo_config import Y_SERVO_ENABLED
 from utils.stream import StreamPublisher
+
+
+class NudgeRequest(BaseModel):
+    direction: str = Field(..., pattern="^(?i)(left|right|up|down)$")
 
 turret: Turret | None = None
 stream_publisher: StreamPublisher | None = None
@@ -148,18 +154,50 @@ INDEX_HTML = """
     .level-info .col-msg { color: #adf; }
     .level-muted .col-msg { color: #666; }
     a { color: #6cf; }
+    .video-col { display: flex; flex-direction: column; gap: 1rem; }
+    .dpad-wrap { padding: 0.75rem 1rem 1rem; }
+    .dpad-wrap h3 {
+      margin: 0 0 0.5rem;
+      font-size: 0.8rem;
+      color: #888;
+      font-weight: 600;
+    }
+    .dpad {
+      display: grid;
+      grid-template-columns: repeat(3, 44px);
+      grid-template-rows: repeat(3, 44px);
+      gap: 4px;
+      justify-content: start;
+    }
+    .dpad button {
+      width: 44px;
+      height: 44px;
+      border: 1px solid #444;
+      border-radius: 6px;
+      background: #2a2a2a;
+      color: #eee;
+      font-size: 1.1rem;
+      cursor: pointer;
+      padding: 0;
+    }
+    .dpad button:hover:not(:disabled) { background: #3a3a3a; border-color: #6af; }
+    .dpad button:active:not(:disabled) { background: #444; }
+    .dpad button:disabled { opacity: 0.35; cursor: not-allowed; }
+    .dpad .spacer { visibility: hidden; pointer-events: none; }
+    .dpad-status {
+      margin-top: 0.5rem;
+      font-size: 0.8rem;
+      color: #aaa;
+      min-height: 1.2em;
+    }
+    .dpad-status.err { color: #f66; }
   </style>
 </head>
 <body>
   <h1>raspi-turret</h1>
   <p class="sub">LAN only — live stream + captured logs</p>
   <div class="layout">
-    <div class="panel video-wrap">
-      <h2>Live video</h2>
-      <img src="/video" alt="live stream">
-    </div>
-    <div class="panel log-wrap">
-      <h2>Logs</h2>
+    <motion.div class="video-col">
       <div class="log-table-wrap">
         <table class="log-table">
           <thead>

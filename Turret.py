@@ -113,8 +113,8 @@ class Turret:
         print("[SHUTDOWN] Cleanup done.")
 
     def set_x_angle(self, angle):
-        moved = self._pan.set_angle(angle)
-        return moved
+        with self._servo_lock:
+            return self._pan.set_angle(angle)
 
     def rotate_y_servo(self, angle: float) -> bool:
         """Move tilt servo; angle is clamped to Y_MIN_ANGLE..Y_MAX_ANGLE (100° = home)."""
@@ -127,10 +127,54 @@ class Turret:
                 f"[WARN] Y angle clamped {requested:.1f}° → {safe_angle:.1f}° "
                 f"(safe range {Y_MIN_ANGLE:.0f}–{Y_MAX_ANGLE:.0f}°, home={Y_HOME_ANGLE:.0f}°)"
             )
-        return self._tilt.set_angle(safe_angle)
+        with self._servo_lock:
+            return self._tilt.set_angle(safe_angle)
 
     def set_y_angle(self, angle):
         return self.rotate_y_servo(angle)
+
+    def nudge(self, direction: str) -> dict:
+        """Manual 10° bump: left, right, up, or down."""
+        direction = direction.lower().strip()
+        valid = frozenset({"left", "right", "up", "down"})
+        if direction not in valid:
+            raise ValueError(
+                f"Invalid direction {direction!r}; use left, right, up, or down"
+            )
+
+        with self._servo_lock:
+            pan_moved = False
+            tilt_moved = False
+            step = MANUAL_NUDGE_DEG
+
+            if direction == "left":
+                pan_moved = self._pan.set_angle(self.current_x_angle - step)
+            elif direction == "right":
+                pan_moved = self._pan.set_angle(self.current_x_angle + step)
+            elif direction in ("up", "down"):
+                if self._tilt is None:
+                    raise RuntimeError("Tilt servo not enabled")
+                if direction == "up":
+                    tilt_moved = self._tilt.set_angle(
+                        clamp_y_angle(self.current_y_angle - step)
+                    )
+                else:
+                    tilt_moved = self._tilt.set_angle(
+                        clamp_y_angle(self.current_y_angle + step)
+                    )
+
+        print(
+            f"[MANUAL] nudge {direction} → pan={self.current_x_angle:.1f}° "
+            f"tilt={self.current_y_angle:.1f}°"
+        )
+        return {
+            "ok": True,
+            "direction": direction,
+            "x_angle": self.current_x_angle,
+            "y_angle": self.current_y_angle,
+            "pan_moved": pan_moved,
+            "tilt_moved": tilt_moved,
+        }
 
     def patrol(self, reset_home: bool = False):
         if reset_home:

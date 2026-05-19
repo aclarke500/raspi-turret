@@ -20,7 +20,7 @@ driver.start()
 try:
     print("[RUN] Sweep 0° → 90° → 180°...")
     while True:
-        for angle in (0, 45):
+        for angle in (0, 10):
             moved = driver.set_angle(angle)
             print(f"[MOVE] angle={angle}° moved={moved} current={driver.current_angle:.1f}°")
             time.sleep(1)

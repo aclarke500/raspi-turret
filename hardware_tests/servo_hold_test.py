@@ -17,7 +17,7 @@ import RPi.GPIO as GPIO
 from utils.servo_config import PAN_MAX_ANGLE, RELEASE_PULSE_AFTER_MOVE, X_SERVO_PIN
 from utils.servo_driver import create_driver
 
-HOLD_ANGLE = 90.0
+HOLD_ANGLE = 0
 HOLD_SEC = 10.0
 
 GPIO.setmode(GPIO.BCM)

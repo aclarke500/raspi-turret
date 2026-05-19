@@ -39,6 +39,9 @@ CREEP_LOOP_SLEEP_SEC = 0.2
 TRACK_LOST_FRAMES = 6
 TRACK_LOST_HOLD_SEC = 2.0
 
+# Web D-pad manual control step size
+MANUAL_NUDGE_DEG = 10.0
+
 # pigpio pulse range for 0–270° (matches s.py bench script)
 PIGPIO_PULSE_MIN_US = 500
 PIGPIO_PULSE_MAX_US = 2500

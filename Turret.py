@@ -1,5 +1,6 @@
 import signal
 import sys
+import threading
 import time
 
 import numpy as np
@@ -13,6 +14,7 @@ from utils.servo_config import (
     CREEP_MIN_STEP_DEG,
     PAN_MAX_ANGLE,
     PAN_MIN_ANGLE,
+    MANUAL_NUDGE_DEG,
     TRACK_LOST_FRAMES,
     TRACK_LOST_HOLD_SEC,
     X_SERVO_PIN,
@@ -90,6 +92,7 @@ class Turret:
         self._pan = _get_pan_driver()
         self._tilt = _get_tilt_driver()
         self.target_location = None
+        self._servo_lock = threading.RLock()
 
     @property
     def current_x_angle(self) -> float:

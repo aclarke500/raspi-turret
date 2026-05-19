@@ -16,10 +16,12 @@ from utils.servo_config import (
     TRACK_LOST_FRAMES,
     TRACK_LOST_HOLD_SEC,
     X_SERVO_PIN,
+    Y_HOME_ANGLE,
     Y_MAX_ANGLE,
     Y_MIN_ANGLE,
     Y_SERVO_ENABLED,
     Y_SERVO_PIN,
+    clamp_y_angle,
 )
 from utils.servo_driver import create_driver
 from utils.utils import creep_step_degrees, y_offset_to_degrees
@@ -101,7 +103,7 @@ class Turret:
 
     def setup(self):
         self.set_x_angle(0)
-        self.set_y_angle(0)
+        self.rotate_y_servo(Y_HOME_ANGLE)
 
     def cleanup(self):
         _stop_drivers()
@@ -111,15 +113,26 @@ class Turret:
         moved = self._pan.set_angle(angle)
         return moved
 
-    def set_y_angle(self, angle):
+    def rotate_y_servo(self, angle: float) -> bool:
+        """Move tilt servo; angle is clamped to Y_MIN_ANGLE..Y_MAX_ANGLE (100° = home)."""
         if self._tilt is None:
             return False
-        return self._tilt.set_angle(angle)
+        requested = float(angle)
+        safe_angle = clamp_y_angle(requested)
+        if safe_angle != requested:
+            print(
+                f"[WARN] Y angle clamped {requested:.1f}° → {safe_angle:.1f}° "
+                f"(safe range {Y_MIN_ANGLE:.0f}–{Y_MAX_ANGLE:.0f}°, home={Y_HOME_ANGLE:.0f}°)"
+            )
+        return self._tilt.set_angle(safe_angle)
+
+    def set_y_angle(self, angle):
+        return self.rotate_y_servo(angle)
 
     def patrol(self, reset_home: bool = False):
         if reset_home:
             self.set_x_angle(0)
-            self.set_y_angle(0)
+            self.rotate_y_servo(Y_HOME_ANGLE)
 
         left_to_right = np.linspace(PAN_MIN_ANGLE, PAN_MAX_ANGLE, 30)
         right_to_left = np.linspace(PAN_MAX_ANGLE, PAN_MIN_ANGLE, 30)
@@ -143,10 +156,16 @@ class Turret:
         return None, None
 
     def hold_last_angle(self):
-        print(
-            f"[TARGET] Target lost — holding pan at {self.current_x_angle:.1f}° "
-            f"for {TRACK_LOST_HOLD_SEC:.1f}s"
-        )
+        if self._tilt is not None:
+            print(
+                f"[TARGET] Target lost — holding pan {self.current_x_angle:.1f}° "
+                f"tilt {self.current_y_angle:.1f}° for {TRACK_LOST_HOLD_SEC:.1f}s"
+            )
+        else:
+            print(
+                f"[TARGET] Target lost — holding pan at {self.current_x_angle:.1f}° "
+                f"for {TRACK_LOST_HOLD_SEC:.1f}s"
+            )
         time.sleep(TRACK_LOST_HOLD_SEC)
 
     def traverse(self):
@@ -179,12 +198,13 @@ class Turret:
 
             frames_without_target = 0
 
-            if detection.crosshair_inside_box():
+            if detection.is_centered_on_box():
                 log_tracking_debug(
                     detection,
                     decision="HOLD",
                     pan_angle=self.current_x_angle,
-                    detail="crosshair_inside_box",
+                    tilt_angle=self.current_y_angle,
+                    detail="within_box_center_deadzone",
                 )
                 continue
 
@@ -196,6 +216,7 @@ class Turret:
                     detection,
                     decision="WAIT_INTERVAL",
                     pan_angle=self.current_x_angle,
+                    tilt_angle=self.current_y_angle,
                     detail=f"{wait_left:.1f}s_until_move",
                 )
                 continue
@@ -203,24 +224,7 @@ class Turret:
             step_x = creep_step_degrees(
                 detection.x_norm, CREEP_MAX_STEP_DEG, CREEP_MIN_STEP_DEG
             )
-            if abs(step_x) < 0.1:
-                log_tracking_debug(
-                    detection,
-                    decision="NO_STEP",
-                    step_deg=step_x,
-                    pan_angle=self.current_x_angle,
-                )
-            else:
-                decision = "PAN_RIGHT" if step_x > 0 else "PAN_LEFT"
-                log_tracking_debug(
-                    detection,
-                    decision=decision,
-                    step_deg=step_x,
-                    pan_angle=self.current_x_angle,
-                )
-                self.set_x_angle(self.current_x_angle + step_x)
-                last_move_time = now
-
+            step_y = 0.0
             if self._tilt is not None:
                 step_y = creep_step_degrees(
                     detection.y_norm,
@@ -228,8 +232,34 @@ class Turret:
                     CREEP_MIN_STEP_DEG,
                     y_offset_to_degrees,
                 )
-                if abs(step_y) >= 0.1:
-                    self.set_y_angle(self.current_y_angle + step_y)
+
+            move_parts = []
+            if abs(step_x) >= 0.1:
+                move_parts.append("PAN_RIGHT" if step_x > 0 else "PAN_LEFT")
+                self.set_x_angle(self.current_x_angle + step_x)
+            if self._tilt is not None and abs(step_y) >= 0.1:
+                move_parts.append("TILT_UP" if step_y > 0 else "TILT_DOWN")
+                self.rotate_y_servo(self.current_y_angle + step_y)
+
+            if move_parts:
+                log_tracking_debug(
+                    detection,
+                    decision="+".join(move_parts),
+                    step_deg=step_x if abs(step_x) >= 0.1 else None,
+                    step_y_deg=step_y if abs(step_y) >= 0.1 else None,
+                    pan_angle=self.current_x_angle,
+                    tilt_angle=self.current_y_angle,
+                )
+                last_move_time = now
+            else:
+                log_tracking_debug(
+                    detection,
+                    decision="NO_STEP",
+                    step_deg=step_x,
+                    step_y_deg=step_y,
+                    pan_angle=self.current_x_angle,
+                    tilt_angle=self.current_y_angle,
+                )
 
         print(f"[TARGET] Follow ended: {exit_reason}")
         return exit_reason

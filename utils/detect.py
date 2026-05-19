@@ -8,6 +8,7 @@ import numpy as np
 import tflite_runtime.interpreter as tflite
 
 from utils.camera import get_current_frame
+from utils.servo_config import BOX_CENTER_TOLERANCE
 
 model_path = str(Path.home() / "tflite_models" / "detect.tflite")
 interpreter = tflite.Interpreter(model_path=model_path)
@@ -42,6 +43,28 @@ class DetectionResult:
         return self.left <= cx <= self.right and self.top <= cy <= self.bottom
 
     @property
+    def box_width(self) -> int:
+        return max(1, self.right - self.left)
+
+    @property
+    def box_height(self) -> int:
+        return max(1, self.bottom - self.top)
+
+    def center_offset_px(
+        self, tolerance: float = BOX_CENTER_TOLERANCE
+    ) -> tuple[float, float, float, float]:
+        """Returns (dx, dy, tol_x, tol_y) from crosshair to box centroid."""
+        ch_x, ch_y = self.crosshair_xy
+        cen_x, cen_y = self.centroid_xy
+        tol_x = tolerance * self.box_width
+        tol_y = tolerance * self.box_height
+        return ch_x - cen_x, ch_y - cen_y, tol_x, tol_y
+
+    def is_centered_on_box(self, tolerance: float = BOX_CENTER_TOLERANCE) -> bool:
+        dx, dy, tol_x, tol_y = self.center_offset_px(tolerance)
+        return abs(dx) <= tol_x and abs(dy) <= tol_y
+
+    @property
     def crosshair_xy(self) -> tuple[float, float]:
         return (self.frame_width / 2, self.frame_height / 2)
 
@@ -67,13 +90,24 @@ class DetectionResult:
             return "person_left_of_crosshair"
         return "person_aligned_horizontally"
 
+    def person_vertical_hint(self) -> str:
+        _, cy = self.crosshair_xy
+        _, py = self.centroid_xy
+        if py > cy:
+            return "person_below_crosshair"
+        if py < cy:
+            return "person_above_crosshair"
+        return "person_aligned_vertically"
+
 
 def log_tracking_debug(
     result: DetectionResult | None,
     *,
     decision: str,
     step_deg: float | None = None,
+    step_y_deg: float | None = None,
     pan_angle: float | None = None,
+    tilt_angle: float | None = None,
     detail: str = "",
 ) -> None:
     if result is None:
@@ -86,21 +120,29 @@ def log_tracking_debug(
     ch_x, ch_y = result.crosshair_xy
     cen_x, cen_y = result.centroid_xy
     c = result.corners
-    in_box = result.crosshair_inside_box()
+    dx, dy, tol_x, tol_y = result.center_offset_px()
+    centered = result.is_centered_on_box()
     step_s = "None" if step_deg is None else f"{step_deg:+.1f}"
+    step_y_s = "None" if step_y_deg is None else f"{step_y_deg:+.1f}"
     pan_s = "None" if pan_angle is None else f"{pan_angle:.1f}"
+    tilt_s = "None" if tilt_angle is None else f"{tilt_angle:.1f}"
 
     parts = [
         f"[TRACK] decision={decision}",
         f"crosshair=({ch_x:.0f},{ch_y:.0f})",
         f"centroid=({cen_x:.0f},{cen_y:.0f})",
-        f"in_box={in_box}",
+        f"centered={centered}",
+        f"offset_px=({dx:+.0f},{dy:+.0f})",
+        f"tol_px=({tol_x:.0f},{tol_y:.0f})",
         f"corners=TL{c['top_left']} TR{c['top_right']} BL{c['bottom_left']} BR{c['bottom_right']}",
         f"x_norm={result.x_norm:+.2f} y_norm={result.y_norm:+.2f}",
         f"score={result.score:.2f}",
         result.person_horizontal_hint(),
-        f"step_deg={step_s}",
+        result.person_vertical_hint(),
+        f"step_pan={step_s}",
+        f"step_tilt={step_y_s}",
         f"pan={pan_s}°",
+        f"tilt={tilt_s}°",
     ]
     if detail:
         parts.append(f"detail={detail}")
@@ -223,11 +265,11 @@ def annotate_frame(frame, result: DetectionResult | None):
         (0, 255, 0),
         2,
     )
-    in_box = result.crosshair_inside_box()
+    centered = result.is_centered_on_box()
     label = (
         f"person {result.score:.2f}  "
         f"x={result.x_norm:+.2f} y={result.y_norm:+.2f}  "
-        f"{'ON_TARGET' if in_box else 'CREEP'}"
+        f"{'CENTERED' if centered else 'TRACK'}"
     )
     cv2.putText(
         annotated,

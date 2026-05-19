@@ -10,10 +10,10 @@ Companion to the root [README.md](../README.md). Use this to remember how the co
 
 1. Capture video from a **USB webcam** (1280×720) in a background thread.
 2. While the **X servo** patrols (from current angle, no reset to 0° on re-acquire), run person detection on each stop.
-3. When a person is seen, **follow_target** keeps tracking until lost; creeps when crosshair is outside the person box, holds when inside.
-4. After **TRACK_LOST_FRAMES** consecutive misses, hold last angle briefly then resume patrol.
+3. When a person is seen, **follow_target** keeps tracking until lost; creeps pan and tilt until crosshair is within **BOX_CENTER_TOLERANCE** (5% of box width/height) of the person box centroid.
+4. After **TRACK_LOST_FRAMES** consecutive misses, hold last pan/tilt briefly then resume patrol.
 
-**X-only tracking in practice:** Y servo driver is not started (`Y_SERVO_ENABLED = False` in `utils/servo_config.py`). **No fire/trigger GPIO exists in code yet.**
+**Dual-axis tracking:** Pan (GPIO 17) and tilt (GPIO 27) via `Y_SERVO_ENABLED = True`. Tilt is clamped **75°–125°** (`Y_HOME_ANGLE = 100°` level) through `Turret.rotate_y_servo()`. **No fire/trigger GPIO exists in code yet.**
 
 ---
 
@@ -224,15 +224,15 @@ Current production path uses `utils/camera.py` + `utils/detect.py` only.
 ## Tracking / follow loop (current)
 
 1. `patrol(reset_home=False)` sweeps pan from **current angle** (only `setup()` homes to 0°); on person found returns offsets.
-2. `follow_target()` runs until `TRACK_LOST_FRAMES` consecutive `NO_PERSON` frames — does **not** exit on `HOLD`; creeps when crosshair is outside the person box.
-3. `hold_last_angle()` pauses `TRACK_LOST_HOLD_SEC` at last pan, then patrol resumes.
+2. `follow_target()` runs until `TRACK_LOST_FRAMES` consecutive `NO_PERSON` frames — does **not** exit on `HOLD`; creeps pan/tilt when crosshair is outside the 5% box-center dead zone.
+3. `hold_last_angle()` pauses `TRACK_LOST_HOLD_SEC` at last pan and tilt, then patrol resumes.
 4. `detect_person()` picks **highest-score** person, not first tensor slot. Out-of-range class ids (e.g. 81) are ignored with a warning.
 
 ## Known quirks / tech debt
 
 1. **Software PWM** — RPi.GPIO can still jitter vs pigpio; set `USE_PIGPIO = True` after `sudo pigpiod` if needed.
 2. **Signal handlers** in `Turret.py` on import.
-3. **Y axis** — set `Y_SERVO_ENABLED = True` in `servo_config.py` when tilt is wired.
+3. **Y axis** — GPIO 27, safe range 75–125° (100° home); all tilt moves use `rotate_y_servo()` clamping.
 4. **`requirements.txt` omits `RPi.GPIO` / `pigpio`** — install on the Pi when setting up the venv.
 5. **Shooting** — not implemented in GPIO or Python yet.
 6. **Dual inference** — stream + patrol both run TFLite (CPU load).

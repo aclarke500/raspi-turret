@@ -5,28 +5,29 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
 
-import RPi.GPIO as GPIO
-
-from utils.servo_config import PAN_MAX_ANGLE, X_SERVO_PIN, Y_SERVO_PIN
-from utils.servo_driver import create_driver
-
-GPIO.setmode(GPIO.BCM)
-GPIO.setwarnings(False)
+from raspi_turret.config.servo import PAN_MAX_ANGLE, X_SERVO_PIN
+from raspi_turret.hardware.gpio import GpioBoard
+from raspi_turret.hardware.servo import ServoMotor
 
 print("[INIT] Pan servo bench test (release-pulse enabled via servo_config)")
-driver = create_driver(Y_SERVO_PIN, 0, PAN_MAX_ANGLE)
-driver.start()
+board = GpioBoard()
+board.setup()
+motor = ServoMotor(X_SERVO_PIN, 0, PAN_MAX_ANGLE, board, name="pan")
+motor.start()
 
 try:
     print("[RUN] Sweep 0° → 90° → 180°...")
     while True:
-        for angle in (100, 100):
-            moved = driver.set_angle(angle)
-            print(f"[MOVE] angle={angle}° moved={moved} current={driver.current_angle:.1f}°")
+        for angle in (0, 90, 180):
+            moved = motor.set_angle(angle)
+            print(
+                f"[MOVE] angle={angle}° moved={moved} "
+                f"current={motor.current_angle:.1f}°"
+            )
             time.sleep(1)
 except KeyboardInterrupt:
     print("[EXIT] CTRL+C received")
 finally:
-    driver.stop()
-    GPIO.cleanup()
+    motor.stop()
+    board.cleanup()
     print("[CLEANUP] Done.")

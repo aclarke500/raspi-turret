@@ -22,7 +22,7 @@ ROOT = Path(__file__).resolve().parent.parent
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-from utils.camera_config import apply_frame_transform
+from raspi_turret.config.camera import apply_frame_transform
 
 FRAME_SIZE = (1280, 720)
 WARMUP_FRAMES = 10

@@ -7,7 +7,7 @@ import cv2
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
 
-from utils.camera_config import apply_frame_transform
+from raspi_turret.config.camera import apply_frame_transform
 
 WARMUP_FRAMES = 10
 NUM_PHOTOS = 10

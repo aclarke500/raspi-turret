@@ -29,7 +29,9 @@ When you reconnect hardware, use **BCM** pin numbers (what the code uses).
 | Servo ground | — | **6, 9, 14, 20, 25, 30, 34, or 39** (GND) | Servo GND + supply GND |
 | USB webcam | — | Any USB port | Should appear as `/dev/video0` |
 
-**Servo control:** [`utils/servo_driver.py`](../utils/servo_driver.py) — RPi.GPIO 50 Hz PWM by default, optional **pigpio** (`USE_PIGPIO = True`, run `sudo pigpiod`). After each move: settle, then **release pulse** (`ChangeDutyCycle(0)`) to reduce buzzing. Tune in [`utils/servo_config.py`](../utils/servo_config.py).
+**Servo control:** [`raspi_turret/hardware/drivers.py`](../raspi_turret/hardware/drivers.py) via `ServoMotor` — RPi.GPIO 50 Hz PWM by default, optional **pigpio** (`USE_PIGPIO = True`, run `sudo pigpiod`). After each move: settle, then **release pulse** to reduce buzzing. Tune in [`raspi_turret/config/servo.py`](../raspi_turret/config/servo.py).
+
+**Camera backend:** Set `CAMERA_BACKEND = "usb"` or `"pi"` in [`raspi_turret/config/camera.py`](../raspi_turret/config/camera.py). Default is USB OpenCV (`/dev/video0`).
 
 **Servo power (reduces jitter):** Use **external 5V** for servos; common GND with Pi. A **100–470 µF** cap across servo power helps. Pi 5V pin alone often causes twitching under load.
 
@@ -41,30 +43,35 @@ When you reconnect hardware, use **BCM** pin numbers (what the code uses).
 
 | File | Role |
 |------|------|
-| `main.py` | **Production entry point.** FastAPI app: auto-starts patrol thread + MJPEG stream. |
-| `run.sh` | Activate venv and run `uvicorn main:app --host 0.0.0.0 --port 8000`. |
-| `utils/stream.py` | `StreamPublisher`: 5 FPS annotated JPEG buffer for `/video`. |
-| `Turret.py` | `Turret` class: `patrol()`, `follow_target()`, `hold_last_angle()`, uses `servo_driver`. |
-| `utils/servo_config.py` | Jitter tuning: release pulse, min move, max step, deadband, `USE_PIGPIO`. |
-| `utils/servo_driver.py` | `GpioPwmDriver` / `PigpioDriver` — rate-limited `set_angle()`. |
-| `utils/camera.py` | OpenCV `VideoCapture(0)`, background thread, `get_current_frame()`. |
-| `utils/detect.py` | TFLite SSD: `detect_person()`, `annotate_frame()`, `get_target_direction()` → normalized (x, y). |
-| `utils/utils.py` | `x_offset_to_degrees` / `y_offset_to_degrees` from assumed 55° diagonal FOV, 16:9. |
+| `raspi_turret/app/main.py` | **Production entry point.** FastAPI, lifespan composition root, D-pad API. |
+| `main.py` | Shim: re-exports `app` from `raspi_turret.app.main`. |
+| `run.sh` | `pip install -e .` then `uvicorn raspi_turret.app.main:app --host 0.0.0.0 --port 8000`. |
+| `pyproject.toml` | Editable install of the `raspi_turret` package. |
+| `raspi_turret/hardware/gpio.py` | `GpioBoard` — single BCM setup/cleanup. |
+| `raspi_turret/hardware/servo.py` | `ServoMotor` — pin + angle bounds, `set_angle()`. |
+| `raspi_turret/hardware/drivers.py` | `GpioPwmDriver` / `PigpioDriver` low-level PWM. |
+| `raspi_turret/hardware/camera.py` | `Camera` ABC, `UsbCamera`, `PiCamera`, `create_camera()`. |
+| `raspi_turret/turret/turret.py` | `Turret` — patrol, follow, nudge; injected hardware + detector. |
+| `raspi_turret/vision/detector.py` | `PersonDetector`, `DetectionResult`, annotate. |
+| `raspi_turret/vision/geometry.py` | FOV helpers, `creep_step_degrees()`. |
+| `raspi_turret/stream/publisher.py` | `StreamPublisher` — 5 FPS MJPEG for `/video`. |
+| `raspi_turret/config/servo.py` | Servo tuning, creep, tracking constants. |
+| `raspi_turret/config/camera.py` | `CAMERA_BACKEND` (`usb` / `pi`), flip, frame diff debug. |
+| `utils/*` | Thin re-exports for legacy imports (no import-time GPIO/camera threads). |
 | `coco_labels.txt` | COCO class names — copy to `~/tflite_models/` per root README. |
 | `requirements.txt` | numpy, opencv-python-headless, pillow, tflite-runtime, fastapi, uvicorn. |
-| `hardware_tests/servo_test.py` | Bench test: pan sweep 0° / 90° / 180° (uses servo_driver). |
-| `hardware_tests/servo_hold_test.py` | Hold 90° for 10s — check for buzzing at rest. |
-| `hardware_tests/camera_test.py` | Bench test: 10 OpenCV frames → `test_photos/frame_01.jpg` … (1280×720, 0.1s apart). |
-| `hardware_tests/picam_test.py` | Pi-only: picamera2 detect CSI camera → one frame → `picam_photos/picam_test.jpg`. |
-| `hardware_tests/ai_test.py` | Bench test: `get_target_direction()` loop up to 5 min (Ctrl+C to stop) — normalized (x, y) from frame center. |
-| `calibrate_y_motor.py` | Bench test: GPIO 27 sweep 0–270°. |
+| `hardware_tests/servo_test.py` | Bench: `ServoMotor` + `GpioBoard` pan sweep. |
+| `hardware_tests/servo_hold_test.py` | Hold 90° for 10s — buzzing check. |
+| `hardware_tests/camera_test.py` | Bench: 10 USB frames → `test_photos/`. |
+| `hardware_tests/picam_test.py` | Pi-only CSI still via picamera2. |
+| `hardware_tests/ai_test.py` | Bench: `PersonDetector` + `UsbCamera` loop. |
+| `calibrate_y_motor.py` | Bench: GPIO 27 sweep 0–270°. |
 | `led_test.py` | Blink GPIO 17 — conflicts with X servo on same pin. |
 | `s.py` | Alternative servo test using **pigpio** on GPIO 17. |
 | `compute_fov.py` | Standalone print of horizontal/vertical FOV from diagonal FOV. |
 | `photo.sh` | Legacy: grab one frame via ffmpeg → `test.jpg`. |
 | `main.sh` | Legacy: `photo.sh` + `python detect.py`. |
 | `detect.py` (repo root) | **Fully commented out** — old snapshot + detect path. |
-| `utils/servo.py` | Standalone GPIO 17 helper; **not used** by `main.py`. |
 
 ---
 
@@ -73,46 +80,58 @@ When you reconnect hardware, use **BCM** pin numbers (what the code uses).
 ```mermaid
 flowchart TB
     subgraph entry["Entry"]
-        main["main.py FastAPI"]
+        appMain["raspi_turret.app.main"]
         runsh["run.sh uvicorn"]
     end
 
-    subgraph turret_mod["Turret.py (import side effects)"]
-        TurretClass["class Turret"]
-        GPIOInit["GPIO + PWM init\n(GPIO 17, 27)"]
+    subgraph hardware["raspi_turret.hardware"]
+        GpioBoard["GpioBoard"]
+        Pan["ServoMotor pan"]
+        Tilt["ServoMotor tilt"]
+        Cam["UsbCamera or PiCamera"]
     end
 
-    subgraph utils_pkg["utils/"]
-        detect["detect.py\ndetect_person()"]
-        stream["stream.py\nStreamPublisher"]
-        camera["camera.py\nget_current_frame()"]
-        ut["utils.py\nx_offset_to_degrees()"]
+    subgraph vision["raspi_turret.vision"]
+        Det["PersonDetector"]
+        Geo["geometry"]
+    end
+
+    subgraph core["raspi_turret.turret + stream"]
+        TurretClass["Turret"]
+        Stream["StreamPublisher"]
     end
 
     subgraph external["External / system"]
         tflite["~/tflite_models/detect.tflite"]
         labels["~/tflite_models/coco_labels.txt"]
-        webcam["/dev/video0 via OpenCV"]
+        webcam["/dev/video0 or CSI"]
         gpio["RPi.GPIO PWM"]
     end
 
-    runsh --> main
-    main --> TurretClass
-    main --> stream
-    main --> ut
-    stream --> detect
-    stream --> camera
-    TurretClass --> detect
-    TurretClass --> ut
-    TurretClass --> gpio
-    GPIOInit --> gpio
-    detect --> camera
-    detect --> tflite
-    detect --> labels
-    camera --> webcam
+    runsh --> appMain
+    appMain --> GpioBoard
+    appMain --> Pan
+    appMain --> Tilt
+    appMain --> Cam
+    appMain --> Det
+    appMain --> TurretClass
+    appMain --> Stream
+    TurretClass --> Pan
+    TurretClass --> Tilt
+    TurretClass --> Cam
+    TurretClass --> Det
+    TurretClass --> Geo
+    Stream --> Cam
+    Stream --> Det
+    Pan --> GpioBoard
+    Tilt --> GpioBoard
+    Det --> tflite
+    Det --> labels
+    Cam --> webcam
+    Pan --> gpio
 ```
 
-**Import note:** `from Turret import Turret` runs **all top-level code** in `Turret.py` (GPIO setup, signal handlers) before `main.py` calls `T.setup()`.
+**Lifecycle note:** GPIO, camera, and servos start only in FastAPI `lifespan` (`build_hardware()`), not at import time.
 
 ---
 
@@ -121,21 +140,21 @@ flowchart TB
 ```mermaid
 sequenceDiagram
     participant User
-    participant main as main.py
+    participant main as app lifespan
     participant T as Turret
-    participant Cam as utils/camera
-    participant Det as utils/detect
+    participant Cam as Camera
+    participant Det as PersonDetector
 
-    User->>main: python main.py
-    Note over Cam: Background capture thread starts when detect/camera loads
-    main->>T: Turret(); setup() → pan to 0,0
+    User->>main: uvicorn raspi_turret.app.main:app
+    main->>Cam: camera.start()
+    main->>T: Turret(...); setup() → pan 0, tilt home
 
     loop Forever
         main->>T: patrol()
         loop Sweep X 0..270..0
             T->>T: set_x_angle(angle)
-            T->>Det: get_target_direction()
-            Det->>Cam: get_current_frame()
+            T->>Det: detect_latest(camera)
+            Det->>Cam: get_frame()
             Det->>Det: TFLite infer "person"
             alt person found
                 Det-->>T: x_norm, y_norm
@@ -147,7 +166,7 @@ sequenceDiagram
             main->>T: follow_target()
             loop until lost
                 T->>T: creep or hold pan
-                T->>Det: get_target_detection()
+                T->>Det: detect_latest(camera)
             end
             main->>T: hold_last_angle()
         end
@@ -160,7 +179,7 @@ sequenceDiagram
 ### Prerequisites (on the Pi)
 
 1. Raspberry Pi OS with `RPi.GPIO` and `tflite_runtime` available.
-2. Python venv + dependencies (see root README and `requirements.txt`).
+2. Python venv + `pip install -e .` + dependencies (see root README and `requirements.txt`).
 3. Model at `~/tflite_models/detect.tflite` and labels at `~/tflite_models/coco_labels.txt`.
 4. USB webcam on `/dev/video0` (OpenCV device index `0`).
 5. Servos rewired per table above.

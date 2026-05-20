@@ -1,0 +1,25 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "raspi-turret"
+version = "0.1.0"
+description = "Raspberry Pi pan/tilt turret with person tracking"
+readme = "README.md"
+requires-python = ">=3.9"
+dependencies = [
+    "numpy",
+    "opencv-python-headless",
+    "pillow",
+    "tflite-runtime",
+    "fastapi",
+    "uvicorn",
+]
+
+[project.optional-dependencies]
+pi = ["RPi.GPIO"]
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["raspi_turret*"]

@@ -5,7 +5,7 @@ from datetime import datetime
 import cv2
 
 # Set True if the webcam is mounted upside down (180° rotation).
-FLIP_UPSIDE_DOWN = True
+FLIP_UPSIDE_DOWN = False
 
 # Log when consecutive captures are nearly identical (stuck / duplicate frames).
 DEBUG_FRAME_DIFF = True
